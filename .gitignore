@@ -10,3 +10,4 @@ launchConfigurations/
 .gitignore
 .jshintrc
 .jshintrc-spec
+/.tmp/
