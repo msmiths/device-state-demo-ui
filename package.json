@@ -77,7 +77,7 @@
   "repository": {
   },
   "engines": {
-    "node": "4.2.x"
+    "node": "4.2.2"
   },
   "scripts": {
     "start": "node server/app.js"
