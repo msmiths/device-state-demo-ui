@@ -1,1 +1,12 @@
 launchConfigurations/
+/.metadata/
+/.project
+/RemoteSystemsTempFiles
+/clientdb.xml
+/bower_components/
+/node_modules/
+/dist/
+.DS_Store
+.gitignore
+.jshintrc
+.jshintrc-spec

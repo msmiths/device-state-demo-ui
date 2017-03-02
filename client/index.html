@@ -1,0 +1,89 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<html data-ng-app="demouiApp" data-ng-controller="AppController as vm">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <base href="/">
+    <title>Watson IoT Device and Thing State Demo</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(client) app/vendor.css -->
+      <!-- bower:css -->
+      <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css" />
+      <link rel="stylesheet" href="../bower_components/angular-material/angular-material.css" />
+      <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css({.tmp,client}) app/app.css -->
+    <link rel="stylesheet" href="app/app.css">
+      <!-- injector:css -->
+      <link rel="stylesheet" href="app/app.css">
+      <link rel="stylesheet" href="app/styles/styles.css">
+      <!-- endinjector -->
+    <!-- endbuild -->
+  </head>
+  <body>
+    <!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <div data-ng-include="'app/layout/shell.html'"></div>
+
+    <!-- Include the D3 library -->
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+    <!--[if lt IE 9]>
+    <script src="bower_components/es5-shim/es5-shim.js"></script>
+    <script src="bower_components/json3/lib/json3.min.js"></script>
+    <![endif]-->
+    <!-- build:js({client,node_modules}) app/vendor.js -->
+      <!-- bower:js -->
+      <script src="../bower_components/angular/angular.js"></script>
+      <script src="../bower_components/jquery/dist/jquery.js"></script>
+      <script src="../bower_components/bootstrap/dist/js/bootstrap.js"></script>
+      <script src="../bower_components/angular-resource/angular-resource.js"></script>
+      <script src="../bower_components/angular-cookies/angular-cookies.js"></script>
+      <script src="../bower_components/angular-messages/angular-messages.js"></script>
+      <script src="../bower_components/angular-sanitize/angular-sanitize.js"></script>
+      <script src="../bower_components/angular-animate/angular-animate.js"></script>
+      <script src="../bower_components/angular-aria/angular-aria.js"></script>
+      <script src="../bower_components/angular-material/angular-material.js"></script>
+      <script src="../bower_components/lodash/lodash.js"></script>
+      <script src="../bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+      <!-- endbower -->
+    <!-- endbuild -->
+
+
+    <!-- build:js({.tmp,client}) app/app.js -->
+    <script src="app/app.module.js"></script>
+    <script src="app/app.controller.js"></script>
+    <script src="app/constants/constants.module.js"></script>
+    <script src="app/constants/constants.constants.js"></script>
+    <script src="app/dialogs/dialogs.module.js"></script>
+    <script src="app/dialogs/CredentialsDialog/credentials.dialog.factory.js"></script>
+    <script src="app/dialogs/CredentialsDialog/credentials.dialog.controller.js"></script>
+    <script src="app/directives/directives.module.js"></script>
+    <script src="app/directives/d3chart.js"></script>
+    <script src="app/layout/layout.module.js"></script>
+    <script src="app/layout/shell.controller.js"></script>
+    <script src="app/layout/shell.routes.js"></script>
+    <script src="app/factories/factories.module.js"></script>
+    <script src="app/factories/dashboard.factory.js"></script>
+    <script src="app/resources/resources.module.js"></script>
+    <script src="app/resources/applicationinterface.resource.js"></script>
+    <script src="app/resources/devicetype.resource.js"></script>
+    <script src="app/resources/schema.resource.js"></script>
+    <script src="app/views/main/main.module.js"></script>
+    <script src="app/views/main/main.controller.js"></script>
+    <script src="app/views/nav/nav.module.js"></script>
+    <script src="app/views/nav/nav.controller.js"></script>
+    <script src="app/views/toolbar/toolbar.module.js"></script>
+    <script src="app/views/toolbar/toolbar.controller.js"></script>
+    <!-- endbuild -->
+
+</body>
+</html>

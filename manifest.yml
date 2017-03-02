@@ -1,4 +1,4 @@
 applications:
-- name: node-hello-world
+- name: device-state-demo-ui
   memory: 128M
   buildpack: sdk-for-nodejs

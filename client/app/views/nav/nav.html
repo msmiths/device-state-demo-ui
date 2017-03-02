@@ -1,0 +1,40 @@
+﻿<md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-open="vm.isOpen">
+  <md-toolbar class="md-warn">
+    <div class="md-toolbar-tools">
+      <h2>Device/Thing Selection</h2>
+      <span flex></span>
+    </div>
+  </md-toolbar>
+
+  <md-content layout-padding>
+    <md-input-container class="md-block">
+      <label>Application Interface</label>
+      <md-select data-ng-model="vm.applicationInterface" data-ng-model-options="{trackBy: '$value.id'}" data-ng-disabled="vm.applicationInterfaces.length === 0">
+        <md-option><em>None</em></md-option>
+        <md-option data-ng-repeat="appIntf in vm.applicationInterfaces" data-ng-value="appIntf">
+          {{ appIntf.name }}
+        </md-option>
+      </md-select>
+    </md-input-container>
+
+    <md-input-container class="md-block">
+      <label>Device Type</label>
+      <md-select data-ng-model="vm.deviceType" data-ng-model-options="{trackBy: '$value.id'}" data-ng-disabled="vm.deviceTypes.length === 0">
+        <md-option><em>None</em></md-option>
+        <md-option data-ng-repeat="deviceType in vm.deviceTypes" data-ng-value="deviceType">
+          {{ deviceType.id }}
+        </md-option>
+      </md-select>
+    </md-input-container>
+
+    <md-input-container class="md-block">
+      <label>Device</label>
+      <md-select data-ng-model="vm.device" data-ng-model-options="{trackBy: '$value.deviceId'}" data-ng-disabled="vm.devices.length === 0">
+        <md-option><em>None</em></md-option>
+        <md-option data-ng-repeat="device in vm.devices" data-ng-value="device">
+          {{ device.deviceId }}
+        </md-option>
+      </md-select>
+    </md-input-container>
+  </md-content>
+</md-sidenav>

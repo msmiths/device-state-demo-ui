@@ -1,0 +1,76 @@
+.credentials-dialog {
+  min-width: 500px;
+}
+
+.DeviceStateChartAxis path {
+  fill: none;
+  stroke: lightgrey;
+  stroke-width: 2px;
+  shape-rendering: crispEdges;
+}
+
+.DeviceStateChartAxis line {
+  stroke: lightgrey;
+  opacity: 0.75;
+}
+
+.DeviceStateChart path.line {
+  fill-opacity: 0;
+  stroke-opacity: 1;
+  stroke-width: 1.5px;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
+  stroke-miterlimit: 4;
+}
+
+.DeviceStateChart path.line.temperature {
+  stroke-dasharray: none;
+}
+
+.DeviceStateChart path.line.humidity {
+  stroke-dasharray: 5;
+}
+
+.DeviceStateChart path.line.hover {
+  stroke-width: 6px;
+}
+
+.device-state-data-table-container {
+  padding: 20px;
+}
+
+.device-state-data-chart-container {
+  padding: 20px;
+}
+
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 40px;
+  height: 25px;
+  padding: 5px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.solidline {
+  border: 0 none;
+  border-top: 2px solid #322f32;
+  background: none;
+  height:0;
+  display: inline-block;
+  width: 50%;
+  margin: 0 0 5px 0;
+}
+.dashedline {
+  border: 0 none;
+  border-top: 2px dashed #322f32;
+  background: none;
+  height:0;
+  display: inline-block;
+  width: 50%;
+  margin: 0 0 5px 0;
+}
