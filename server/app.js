@@ -33,6 +33,7 @@ var options = {
   cert: process.env.SERVER_CERT
 };
 
+console.log('process.env.NODE_ENV: %s', process.env.NODE_ENV);
 console.log('process.env.SERVER_KEY: %s', process.env.SERVER_KEY);
 console.log('process.env.SERVER_CERT: %s', process.env.SERVER_CERT);
 
@@ -43,8 +44,8 @@ app.use('/api/v0002', proxy('mjk9pl.internetofthings.ibmcloud.com', {
   forwardPath: function(req, res) {
     return '/api/v0002' + url.parse(req.url).path;
   }}));
-//var server = require('https').createServer(options, app);
-var server = require('http').createServer(app);
+var server = require('https').createServer(options, app);
+//var server = require('http').createServer(app);
 require('./config/express')(app);
 require('./routes')(app);
 
@@ -53,7 +54,7 @@ var appEnv = cfenv.getAppEnv();
 
 // Start server
 server.listen(appEnv.port, '0.0.0.0', function () {
-  console.log('Express server listening on %d, on %s ', appEnv.port, appEnv.url);
+  console.log('Express server listening on %s, in %s mode ', appEnv.url, app.get('env'));
 });
 
 //server.listen(config.port, config.ip, function () {
