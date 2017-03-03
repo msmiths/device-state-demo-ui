@@ -33,10 +33,6 @@ var options = {
   cert: process.env.SERVER_CERT
 };
 
-console.log('process.env.NODE_ENV: %s', process.env.NODE_ENV);
-console.log('process.env.SERVER_KEY: %s', process.env.SERVER_KEY);
-console.log('process.env.SERVER_CERT: %s', process.env.SERVER_CERT);
-
 // Setup server
 var app = express();
 app.use('/api/v0002', proxy('mjk9pl.internetofthings.ibmcloud.com', {
@@ -44,8 +40,12 @@ app.use('/api/v0002', proxy('mjk9pl.internetofthings.ibmcloud.com', {
   forwardPath: function(req, res) {
     return '/api/v0002' + url.parse(req.url).path;
   }}));
-var server = require('https').createServer(options, app);
-//var server = require('http').createServer(app);
+
+if (process.env.NODE_ENV === 'production') {
+  var server = require('http').createServer(app);
+} else {
+  var server = require('https').createServer(options, app);
+}
 require('./config/express')(app);
 require('./routes')(app);
 
