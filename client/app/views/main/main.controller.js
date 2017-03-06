@@ -14,8 +14,11 @@
 	  vm.chartRefreshInterval = 5000;
 	  vm.chartController = {};
     vm.colorScale = d3.scale.category10().range();
+    vm.applicationInterface = null;
     vm.applicationInterfaceSchema = null;
 	  vm.schemaProperties = [];
+    vm.deviceType = null;
+    vm.device = null;
 	  vm.deviceStateData = [];
 	  vm.intervalPromise = null;
 
@@ -80,19 +83,22 @@
      */
     function onApplicationInterfaceSelected() {
       // First, reset the relevant view-model variables
+      vm.applicationInterface = null;
       vm.applicationInterfaceSchema = null;
       vm.schemaProperties = [];
+      vm.deviceType = null;
+      vm.device = null;
       vm.deviceStateData = [];
       
       // Now reset the chart
       vm.chartController.reset();
       
       // Retrieve the selected application interface
-      var applicationInterface = DashboardFactory.getSelectedApplicationInterface();
-      if (applicationInterface) {
+      vm.applicationInterface = DashboardFactory.getSelectedApplicationInterface();
+      if (vm.applicationInterface) {
         // Retrieve the schema for the selected application interface
         Schema.getContent(
-          { schemaId: applicationInterface.schemaId },
+          { schemaId: vm.applicationInterface.schemaId },
           function(schema) {
             // Store the application interface
             vm.applicationInterfaceSchema = schema;
@@ -134,7 +140,11 @@
       
       // Reset the relevant view-model variables and the chart
       vm.deviceStateData = [];
-      
+
+      // Retrieve the currently selected device type and device
+      vm.deviceType = DashboardFactory.getSelectedDeviceType();
+      vm.device = DashboardFactory.getSelectedDevice();
+
       // Now reset the chart
       vm.chartController.reset();
     }
@@ -148,7 +158,10 @@
       
       // Reset the relevant view-model variables and the chart
       vm.deviceStateData = [];
-      
+
+      // Retrieve the currently selected device
+      vm.device = DashboardFactory.getSelectedDevice();
+
       // Now reset the chart
       vm.chartController.reset();
     }

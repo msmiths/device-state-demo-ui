@@ -1,4 +1,6 @@
 <div class="row">
+  <h1 data-ng-show="vm.applicationInterface">{{ vm.applicationInterface.name }} State</h1>
+  <h2 data-ng-show="vm.deviceType && vm.device">For the {{ vm.deviceType.id }} device {{ vm.device.deviceId }}</h2>
   <div id="chartContainer" class="device-state-data-chart-container">
     <d3-chart data="vm.deviceStateData" properties="vm.schemaProperties" refresh-interval="vm.chartRefreshInterval" interaction-controller="vm.chartController" id="chart" class="DeviceStateChart"></d3-chart>
   </div>
