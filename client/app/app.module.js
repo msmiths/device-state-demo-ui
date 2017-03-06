@@ -30,7 +30,8 @@
       'demouiApp.main',
       'demouiApp.nav',
       'demouiApp.toolbar',
-      'demouiApp.resources'
+      'demouiApp.resources',
+      'demouiApp.toasts'
     ]
   );
 

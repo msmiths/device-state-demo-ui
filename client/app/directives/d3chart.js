@@ -38,12 +38,18 @@
 
               }
             );
-          }
+          } // createLineGenerators
 
           /**
            * The createLine function creates a line on the chart for the
            * specified property.  The index specified determines the color that
            * will be used for the line.
+           * 
+           * @param property
+           *          The property to create the line for.
+           * @param index
+           *          The index into the color scale that the determines the
+           *          color of the line. 
            */
           scope.createLine = function(property, index) {
             chart.append("path")
@@ -54,7 +60,7 @@
               .attr("transform", null)
               .attr("fill", colorScale[index])
               .attr("stroke", colorScale[index]);
-          }
+          } // createLine
 
           /**
            * The setLineHighlight function modifies the style of the line for
@@ -74,30 +80,48 @@
             if (!line.empty()) {
               line.classed("hover", highlight);
             }
-          }
+          } // highlightLine
 
-          scope.interactionController.toggleLine = function($event, lineId) {
+          /**
+           * The toggleLine function toggles the display of the line on the
+           * chart that represents the specified property. 
+           *
+           * @param $event
+           *          The checkbox event that triggered the toggle.
+           * @param propertyName
+           *          The name of the property represented by the line.
+           */
+          scope.interactionController.toggleLine = function($event, propertyName) {
             // Attempt to retrieve the line
-            var line = chart.select("#" + lineId + '_line');
+            var line = chart.select("#" + propertyName + '_line');
 
             // Now check to see if we need to add or remove the line
             if ($event.target.checked) {
               if (line.empty()) {
                 for (var index = 0; index < scope.properties.length; index++) {
                   var property = scope.properties[index];
-                  if (property.name === lineId) {
+                  if (property.name === propertyName) {
                     scope.createLine(property, index);
                     break;
                   }
                 } // FOR
               }
             } else {
-                if (!line.empty()) {
-                  line.remove();
-                }
+              if (!line.empty()) {
+                line.remove();
+              }
             }
-          }
+          } // toggleLine
 
+          /**
+           * The toggleAllLines toggles the display of all of the lines on the
+           * chart.
+           *
+           * @param $event
+           *          The checkbox event that triggered the toggle.
+           * @param propertyName
+           *          The name of the property represented by the line.
+           */
           scope.interactionController.toggleAllLines = function($event) {
             if (scope.data) {
               for (var index = 0; index < scope.properties.length; index++) {
@@ -107,7 +131,28 @@
                 checkbox.checked = $event.target.checked;
               });
             }
-          }
+          } // toggleAllLines
+
+          /**
+           * The reset function resets the state of the chart.
+           */
+          scope.interactionController.reset = function() {
+            // First, remove all of the data points and lines from the chart
+            scope.removeDataPoints();
+            scope.removeLines();
+            
+            // Reset the session start time
+            sessionStartTime = Date.now();
+            
+            // Empty the data stored in the local scope 
+            scope.data = [];
+
+            // Now recreate the lines
+            scope.properties.forEach( function(property, index) {
+                scope.createLine(property, index);
+              }
+            );
+          } // reset
 
           /**
            * The getDomainEndTime function calculates the end time that should
@@ -120,7 +165,7 @@
            *           format is the number of millis since epoch.
            */
           scope.getDomainEndTime = function() {
-            var endTime = 0;
+            var endTime = sessionStartTime;
             if (scope.data) {
               if (scope.data.length > 0) {
                 var datum = scope.data[scope.data.length - 1];
@@ -128,13 +173,8 @@
               }
             }
 
-            // Check to see if we found a valid endTime
-            if (endTime == 0) {
-              endTime = sessionStartTime;
-            }
-
             return endTime;
-          }
+          } // getDomainEndTime
 
           /**
            * The renderDataPoints function renders circles for each of the data
@@ -194,11 +234,19 @@
           /**
            * The removeDataPoints function removes any data points (circles)
            * that are being displayed on the chart whenever the mouse leaves the
-           * chart.
+           * chart, or when the reset method is invoked.
            */
           scope.removeDataPoints = function() {
               chart.selectAll("circle").remove();
-          } // REMOVEDATAPOINTS
+          } // removeDataPoints
+
+          /**
+           * The removeLines function removes all of the lines (paths) from the
+           * chart.
+           */
+          scope.removeLines = function() {
+              chart.selectAll(".line").remove();
+          } // removeLines
 
           /**
            * The refresh function refreshes the chart on the glass using the

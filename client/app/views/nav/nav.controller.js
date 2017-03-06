@@ -5,9 +5,9 @@
     .module('demouiApp.nav')
     .controller('NavController', NavController);
 
-  NavController.$inject = ['$scope', '$q', 'DashboardFactory', 'ApplicationInterface', 'DeviceType'];
+  NavController.$inject = ['$scope', '$q', 'DashboardFactory', 'ApplicationInterface', 'DeviceType', 'ActionToast', 'CredentialsDialog'];
 
-  function NavController($scope, $q, DashboardFactory, ApplicationInterface, DeviceType) {
+  function NavController($scope, $q, DashboardFactory, ApplicationInterface, DeviceType, ActionToast, CredentialsDialog) {
     /*jshint validthis: true */
     var vm = this;
 
@@ -43,33 +43,17 @@
        */
       $scope.$watch('vm.applicationInterface', function() {
         if (vm.applicationInterface) {
-          if (vm.applicationInterface !== 'None') {
-            onApplicationInterfaceSelected();
-          } else {
-            vm.deviceTypes = [];
-            vm.devices = [];
-            vm.deviceType = null;
-            vm.device = null;
-          }
+          onApplicationInterfaceSelected();
         }
       });
       $scope.$watch('vm.deviceType', function() {
         if (vm.deviceType) {
-          if (vm.deviceType !== 'None') {
             onDeviceTypeSelected();
-          } else {
-            vm.devices = [];
-            vm.device = null;
-          }
         }
       });
       $scope.$watch('vm.device', function() {
         if (vm.device) {
-          if (vm.device !== 'None') {
-            onDeviceSelected();
-          } else {
-            vm.device = null;
-          }
+          onDeviceSelected();
         }
       });
     }
@@ -87,10 +71,15 @@
         },
         function(response) {
           /*
-           * Check specifically for a 401 response here.  This indicates that
-           * the credentials entered by the user are incorrect/invalid.
+           * Check specifically for a 401 Unauthorized or a 403 Forbidden 
+           * response here.  This indicates that the credentials entered by
+           * the user are incorrect/invalid.
            */
-          debugger;
+          if (  response.status === 401
+             || response.status === 403
+             ) {
+            onUnauthorizedOrForbiddenResponse();
+          }
         }
       );
     }
@@ -101,23 +90,35 @@
      * selected application interface.
      */
     function onApplicationInterfaceSelected() {
-      // First, store the selected application interface in the DashboardFactory
-      DashboardFactory.setSelectedApplicationInterface(vm.applicationInterface);
+      // Reset the relevant view-model variables
+      vm.deviceTypes = [];
+      vm.devices = [];
+      vm.deviceType = null;
+      vm.device = null;
 
       /*
-       * We need to retrieve all of the Device Types that have deployed
-       * configuration and then, for each Device Type returned, retrieve the
-       * Application Interfaces associated with the Device Type.  We then
-       * need to check if the id of any of these Application Interfaces
-       * matches the id of the selected Application Interface.
+       * Now store the selected application interface, device type and device in
+       * the DashboardFactory.
+       */
+      DashboardFactory.setSelectedApplicationInterface(vm.applicationInterface !== 'None' ? vm.applicationInterface : null);
+      DashboardFactory.setSelectedDeviceType(vm.deviceType);
+      DashboardFactory.setSelectedDevice(vm.device);
+
+      /*
+       * If a valid application interface was selected, we need to retrieve all
+       * of the Device Types that have deployed configuration and then, for each
+       * Device Type returned, retrieve the Application Interfaces associated
+       * with the Device Type.  We then need to check if the id of any of these
+       * Application Interfaces matches the id of the selected Application
+       * Interface.
        *
        * Most of this code goes away once we have an applicationInterfaceId
        * filter on the Device Types REST API.
        */
-      DeviceType.query(
-       {excludeNotDeployed: true},
-       function(response) {
-
+      if (vm.applicationInterface !== 'None') {
+        DeviceType.query(
+          {excludeNotDeployed: true},
+          function(response) {
             /*
              * Now retrieve the application interfaces associated with each of
              * returned Device Types.  Make all of these calls in parallel.
@@ -149,13 +150,19 @@
           },
           function(response) {
             /*
-             * Check specifically for a 401 response here.  This indicates that
-             * the credentials entered by the user are incorrect/invalid.
+             * Check specifically for a 401 Unauthorized or a 403 Forbidden 
+             * response here.  This indicates that the credentials entered by
+             * the user are incorrect/invalid.
              */
-            debugger;
+            if (  response.status === 401
+               || response.status === 403
+               ) {
+              onUnauthorizedOrForbiddenResponse();
+            }
           }
         );
-    }
+      } // IF - vm.applicationInterface !== 'None'
+    } // onApplicationInterfaceSelected
 
     /**
      * Called when the user changes the device type that is selected. In
@@ -164,31 +171,62 @@
      */
     function onDeviceTypeSelected() {
       // First, store the selected device type in the DashboardFactory
-      DashboardFactory.setSelectedDeviceType(vm.deviceType);
 
-      DeviceType.getDevices(
-        { typeId: vm.deviceType.id },
-        function(response) {
-          // Store the list of devices
-          vm.devices = response.results;
-        },
-        function(response) {
-          /*
-           * Check specifically for a 401 response here.  This indicates that
-           * the credentials entered by the user are incorrect/invalid.
-           */
-          debugger;
-        }
-      );
-    }
+      // Reset the relevant view-model variables
+      vm.devices = [];
+      vm.device = null;
+
+      // Now store the selected device type and device in the DashboardFactory.
+      DashboardFactory.setSelectedDeviceType(vm.deviceType !== 'None' ? vm.deviceType : null);
+      DashboardFactory.setSelectedDevice(vm.device);
+
+      /*
+       * If a valid device type was selected, we need to retrieve all of the
+       * devices of that type.
+       */
+      if (vm.deviceType !== 'None') {
+        DeviceType.getDevices(
+          { typeId: vm.deviceType.id },
+          function(response) {
+            // Store the list of devices
+            vm.devices = response.results;
+          },
+          function(response) {
+            /*
+             * Check specifically for a 401 Unauthorized or a 403 Forbidden 
+             * response here.  This indicates that the credentials entered by
+             * the user are incorrect/invalid.
+             */
+            if (  response.status === 401
+               || response.status === 403
+               ) {
+              onUnauthorizedOrForbiddenResponse();
+            }
+          }
+        );
+      } // IF - vm.deviceType !== 'None'
+    } // onDeviceTypeSelected
 
     /**
      * Called when the user changes the device that is selected.
      */
     function onDeviceSelected() {
       // Store the selected device in the DashboardFactory
-      DashboardFactory.setSelectedDevice(vm.device);
-    }
-
+      DashboardFactory.setSelectedDevice(vm.device !== 'None' ? vm.device : null);
+    } // onDeviceSelected
+    
+    /**
+     * Called when a "403 Forbidden" is returned from a call to a Watson IoT
+     * REST API. 
+     */
+    function onUnauthorizedOrForbiddenResponse() {
+      ActionToast.show({
+        message: 'The credentials that you entered are invalid.  Please enter a valid API Key and Authentication Token in the Credentials Dialog.',
+        actionMessage: 'Edit Credentials',
+        actionCallback: function(event) {
+          CredentialsDialog.show(event);
+        }
+      });
+    } // onUnauthorizedOrForbiddenResponse 
   }
 })();

@@ -74,3 +74,19 @@ div.tooltip {
   width: 50%;
   margin: 0 0 5px 0;
 }
+
+md-toast.md-top {
+  top: 84px;
+}
+
+md-toast .md-toast-content {
+  padding: 10px 0 10px 18px;
+}
+
+.md-toast .md-button {
+  margin-right: 12px;
+}
+
+.md-button.md-icon-button md-icon {
+  color: #FFFFFF;
+}

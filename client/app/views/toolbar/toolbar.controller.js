@@ -5,9 +5,9 @@
   .module('demouiApp.toolbar')
   .controller('ToolbarController', ToolbarController);
 
-  ToolbarController.$inject = ['$mdSidenav', '$mdDialog', 'CredentialsDialog', 'DashboardFactory'];
+  ToolbarController.$inject = ['$mdSidenav', 'CredentialsDialog', 'DashboardFactory'];
 
-  function ToolbarController($mdSidenav, $mdDialog, CredentialsDialog, DashboardFactory) {
+  function ToolbarController($mdSidenav, CredentialsDialog, DashboardFactory) {
     /*jshint validthis: true */
     var vm = this;
 

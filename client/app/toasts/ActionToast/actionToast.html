@@ -1,0 +1,7 @@
+<md-toast>
+  <span class="md-toast-text" flex>{{ vm.message }}</span>
+  <md-button class="md-highlight md-action" ng-click="vm.performAction($event)">{{ vm.actionMessage }}</md-button>
+  <md-button class="md-icon-button" data-ng-click="vm.closeToast()">
+    <md-icon md-svg-src="app/images/close.svg" aria-label="Close"></md-icon>
+  </md-button>
+</md-toast>
