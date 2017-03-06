@@ -12,4 +12,7 @@ module.exports = {
   port:     process.env.OPENSHIFT_NODEJS_PORT ||
             process.env.PORT ||
             8080,
+            
+  WIOT_DOMAIN: process.env.WIOT_DOMAIN ||
+              "internetofthings.ibmcloud.com"
 };
