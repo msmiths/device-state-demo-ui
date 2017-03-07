@@ -43,14 +43,6 @@ h2 {
   stroke-width: 6px;
 }
 
-.device-state-data-table-container {
-  padding: 20px;
-}
-
-.device-state-data-chart-container {
-  padding: 20px;
-}
-
 div.tooltip {
   position: absolute;
   text-align: center;

@@ -366,7 +366,7 @@
          * Now define the the scales and axes.  We want to scale the axes so
          * that they fit the width and height of the chart.
          */
-        var colorScale = d3.scale.category10().range();
+        var colorScale = d3.scale.category20().range();
         var xRange = d3.time.scale().range([0, chartWidth]);
         var yRange = d3.scale.linear().range([chartHeight, 0]);
         var xAxis = d3.svg.axis().scale(xRange)
