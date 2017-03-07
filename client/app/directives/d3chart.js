@@ -255,6 +255,7 @@
           scope.refresh = function() {
             var currentDomain = xRange.domain();
             var currentStartTime = currentDomain[0];
+            var yMax = 0;
 
             // Animate the changes using a transition
             var t = chart.transition()
@@ -270,6 +271,42 @@
               if (!circle.empty()) {
                 scope.renderDataPoints();
               }
+
+              // Now update each of the lines on the chart.
+              
+              /*
+               * The first thing that we need to do is determine if the extent
+               * of the y axis has changed and, if it has, update the y axis to
+               * reflect this.  In order to do this we need to iterate over the
+               * properties and keep track of the maximum y value.
+               * 
+               * We need to do this before updating any lines so that the lines
+               * are drawn to the correct scale.
+               */
+              for (var index = 0; index < scope.properties.length; index++) {
+                var property = scope.properties[index];
+                /*
+                 * Make sure that the line for the current property is vislble
+                 * by selecting the line making sure that it is not empty. 
+                 */
+                var line = chart.select("#" + property.name + '_line');
+                if (!line.empty()) {
+                  var propertyMax = d3.max(scope.data, function(d) { return d[property.name]; });
+                  if (propertyMax > yMax) {
+                    yMax = propertyMax;
+                  }
+                }
+              } // FOR
+
+              // Now that we have the maximum y value, update the y axis
+              if (yMax > 0) {
+                var yDomainMax = yMax * 1.1; // Add on 10%
+                if (yDomainMax > 1) {
+                  yDomainMax = Math.round(yDomainMax);
+                }
+                yRange.domain([0, yDomainMax]).nice();
+                t.select(".y.DeviceStateChartAxis").call(yAxis);
+              } // IF - yMax > 0
 
               // Now update each of the lines on the chart.
               for (var index = 0; index < scope.properties.length; index++) {
