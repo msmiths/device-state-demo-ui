@@ -71,6 +71,10 @@
       if (  DashboardFactory.getApiKey()
          && DashboardFactory.getAuthenticationToken()
          ) {
+        /*
+         * The user has specified some credentials... so hide this particular
+         * toast.
+         */
         ActionToast.hide();
       } else {
         ActionToast.show({
@@ -78,6 +82,9 @@
           actionMessage: 'Edit Credentials',
           actionCallback: function(event) {
             CredentialsDialog.show(event);
+          },
+          closeCallback: function() {
+            onSelectedDeviceOrThingChanged();
           }
         });
       }

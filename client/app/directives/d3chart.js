@@ -316,7 +316,7 @@
           }, true);
 
         // Set the width of the chart to the width of the state table
-        var chartDiv = document.getElementById("stateTable")
+        var chartDiv = document.getElementById("numericPropertiesTable")
         var height = 500;
         var width = chartDiv.clientWidth;
         var chartMargins = {top: 10, right: 15, bottom: 20, left: 25};

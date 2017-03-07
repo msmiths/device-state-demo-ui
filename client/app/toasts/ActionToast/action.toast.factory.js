@@ -29,6 +29,7 @@
       toastScope.message = options.message;
       toastScope.actionMessage = options.actionMessage;
       toastScope.actionCallback = options.actionCallback;
+      toastScope.closeCallback = options.closeCallback;
       
       /*
        * Now create the options object for the toast and initialize it with any
@@ -46,10 +47,12 @@
       if (!toastOpen) {
         toastOpen = true;
         $mdToast.show(toastOptions).then(function(response) {
-          if ( response == 'ok' ) {
-            alert('You clicked \'OK\'.');
-          }
           toastOpen = false;
+          
+          // Invoke the closeCallback passed in the options, if any
+          if (toastScope.closeCallback) {
+            toastScope.closeCallback();
+          }
         });   
       }
     }

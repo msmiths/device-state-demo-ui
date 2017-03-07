@@ -2,10 +2,11 @@
   <h1 data-ng-show="vm.applicationInterface">{{ vm.applicationInterface.name }} State</h1>
   <h2 data-ng-show="vm.deviceType && vm.device">For the {{ vm.deviceType.id }} device {{ vm.device.deviceId }}</h2>
   <div id="chartContainer" class="device-state-data-chart-container">
-    <d3-chart data="vm.deviceStateData" properties="vm.schemaProperties" refresh-interval="vm.chartRefreshInterval" interaction-controller="vm.chartController" id="chart" class="DeviceStateChart"></d3-chart>
+    <d3-chart data="vm.deviceStateData" properties="vm.numericSchemaProperties" refresh-interval="vm.chartRefreshInterval" interaction-controller="vm.chartController" id="chart" class="DeviceStateChart"></d3-chart>
   </div>
-  <div class="device-state-data-table-container">
-    <table class="table table-striped table-bordered table-hover" id="stateTable">
+  <div class="device-state-data-table-container" data-ng-show="vm.numericSchemaProperties.length > 0">
+    <h3>Numeric Properties</h3>
+    <table class="table table-striped table-bordered table-hover" id="numericPropertiesTable">
       <thead>
         <tr class="info">
           <th></th>
@@ -14,9 +15,24 @@
           <th>Property Value</th>
         </tr>
       </thead>
-      <tr data-ng-repeat="property in vm.schemaProperties" data-ng-mouseover="vm.chartController.highlightLine(property.name, true)" data-ng-mouseleave="vm.chartController.highlightLine(property.name, false)">
+      <tr data-ng-repeat="property in vm.numericSchemaProperties" data-ng-mouseover="vm.chartController.highlightLine(property.name, true)" data-ng-mouseleave="vm.chartController.highlightLine(property.name, false)">
         <td style="background-color: {{ vm.colorScale[$index] }}"></td>
         <td><input type="checkbox" checked="checked" data-ng-click="vm.chartController.toggleLine($event, property.name)"></td>
+        <td>{{ property.name }}</td>
+        <td>{{ vm.deviceStateData[vm.deviceStateData.length - 1][property.name] }}</td>
+      </tr>
+    </table>
+  </div>
+  <div class="device-state-data-table-container" data-ng-show="vm.nonNumericSchemaProperties.length > 0">
+    <h3>Other Properties</h3>
+    <table class="table table-striped table-bordered table-hover" id="nonNumericPropertiesTable">
+      <thead>
+        <tr class="info">
+          <th>Property Name</th>
+          <th>Property Value</th>
+        </tr>
+      </thead>
+      <tr data-ng-repeat="property in vm.nonNumericSchemaProperties">
         <td>{{ property.name }}</td>
         <td>{{ vm.deviceStateData[vm.deviceStateData.length - 1][property.name] }}</td>
       </tr>

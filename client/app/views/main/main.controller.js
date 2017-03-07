@@ -13,10 +13,11 @@
 
 	  vm.chartRefreshInterval = 5000;
 	  vm.chartController = {};
-    vm.colorScale = d3.scale.category10().range();
+    vm.colorScale = d3.scale.category20().range();
     vm.applicationInterface = null;
     vm.applicationInterfaceSchema = null;
-	  vm.schemaProperties = [];
+    vm.numericSchemaProperties = [];
+    vm.nonNumericSchemaProperties = [];
     vm.deviceType = null;
     vm.device = null;
 	  vm.deviceStateData = [];
@@ -85,7 +86,8 @@
       // First, reset the relevant view-model variables
       vm.applicationInterface = null;
       vm.applicationInterfaceSchema = null;
-      vm.schemaProperties = [];
+      vm.numericSchemaProperties = [];
+      vm.nonNumericSchemaProperties = [];
       vm.deviceType = null;
       vm.device = null;
       vm.deviceStateData = [];
@@ -104,12 +106,15 @@
             vm.applicationInterfaceSchema = schema;
 
             // Normalise the properties into an array
-            vm.schemaProperties = [];
+            vm.numericSchemaProperties
+            vm.nonNumericSchemaProperties = [];
             Object.keys(schema.properties).forEach(function (key) {
               var property = schema.properties[key];
-              if (property.type && property.type == 'number') {
-                property.name = key;
-                vm.schemaProperties.push(property);
+              property.name = key;
+              if (property.type && property.type === 'number') {
+                vm.numericSchemaProperties.push(property);
+              } else {
+                vm.nonNumericSchemaProperties.push(property);
               }
             });
           },
