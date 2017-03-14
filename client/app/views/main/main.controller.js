@@ -5,22 +5,23 @@
     .module('demouiApp.main')
     .controller('MainController', MainController);
 
-  MainController.$inject = ['$scope', '$http', '$q', '$interval', '$mdSidenav', 'DashboardFactory', 'Schema', 'DeviceType', 'ActionToast', 'CredentialsDialog'];
+  MainController.$inject = ['$scope', '$http', '$q', '$interval', '$mdSidenav', 'Constants', 'DashboardFactory', 'Schema', 'DeviceType', 'ThingType', 'ActionToast', 'CredentialsDialog'];
 
-  function MainController($scope, $http, $q, $interval, $mdSidenav, DashboardFactory, Schema, DeviceType, ActionToast, CredentialsDialog) {
+  function MainController($scope, $http, $q, $interval, $mdSidenav, Constants, DashboardFactory, Schema, DeviceType, ThingType, ActionToast, CredentialsDialog) {
     /*jshint validthis: true */
     var vm = this;
 
-	  vm.chartRefreshInterval = 5000;
+    vm.constants = Constants;
+	  vm.chartRefreshInterval = 1000;
 	  vm.chartController = {};
     vm.colorScale = d3.scale.category20().range();
     vm.applicationInterface = null;
     vm.applicationInterfaceSchema = null;
     vm.numericSchemaProperties = [];
     vm.nonNumericSchemaProperties = [];
-    vm.deviceType = null;
-    vm.device = null;
-	  vm.deviceStateData = [];
+    vm.type = null;
+    vm.instance = null;
+	  vm.stateData = [];
 	  vm.intervalPromise = null;
 
     /**
@@ -41,7 +42,7 @@
         function(newValue, oldValue) {
           if (newValue) {
             vm.intervalPromise = $interval(function() {
-              retrieveDeviceState();
+              retrieveState();
             }, vm.chartRefreshInterval);
           } else {
             $interval.cancel(vm.intervalPromise);
@@ -65,15 +66,15 @@
       );
       $scope.$watch(
         function() {
-          return DashboardFactory.getSelectedDeviceType();
+          return DashboardFactory.getSelectedType();
         },
-        onDeviceTypeSelected
+        onTypeSelected
       );
       $scope.$watch(
         function() {
-          return DashboardFactory.getSelectedDevice();
+          return DashboardFactory.getSelectedInstance();
         },
-        onDeviceSelected
+        onInstanceSelected
       );
     } // activate
 
@@ -88,9 +89,9 @@
       vm.applicationInterfaceSchema = null;
       vm.numericSchemaProperties = [];
       vm.nonNumericSchemaProperties = [];
-      vm.deviceType = null;
-      vm.device = null;
-      vm.deviceStateData = [];
+      vm.type = null;
+      vm.instance = null;
+      vm.stateData = [];
       
       // Now reset the chart
       vm.chartController.reset();
@@ -137,76 +138,149 @@
     }
 
     /**
-     * Called when the user changes the device type that is selected.
-     * In response, we need to remove the current state data and reset the
-     * chart. 
+     * Called when the user changes the type that is selected. In response, we
+     * need to remove the current state data and reset the chart. 
      */
-    function onDeviceTypeSelected() {
+    function onTypeSelected() {
       
       // Reset the relevant view-model variables and the chart
-      vm.deviceStateData = [];
+      vm.stateData = [];
 
       // Retrieve the currently selected device type and device
-      vm.deviceType = DashboardFactory.getSelectedDeviceType();
-      vm.device = DashboardFactory.getSelectedDevice();
+      vm.type = DashboardFactory.getSelectedType();
+      vm.instance = DashboardFactory.getSelectedInstance();
 
       // Now reset the chart
       vm.chartController.reset();
     }
 
     /**
-     * Called when the user changes the device that is selected.
-     * In response, we need to remove the current state data and reset the
-     * chart. 
+     * Called when the user changes the instance that is selected. In response,
+     * we need to remove the current state data and reset the chart. 
      */
-    function onDeviceSelected() {
+    function onInstanceSelected() {
       
       // Reset the relevant view-model variables and the chart
-      vm.deviceStateData = [];
+      vm.stateData = [];
 
-      // Retrieve the currently selected device
-      vm.device = DashboardFactory.getSelectedDevice();
+      // Retrieve the currently selected instance
+      vm.instance = DashboardFactory.getSelectedInstance();
 
       // Now reset the chart
       vm.chartController.reset();
     }
+
+    /**
+     * Retrieve the state of the currently selected instance.
+     */
+    function retrieveState() {
+      /*
+       * If the user has selected the application interface, type and instance,
+       * retrieve the current state of the selected instance.
+       */
+      if (  DashboardFactory.getSelectedType()
+         && DashboardFactory.getSelectedInstance()
+         && DashboardFactory.getSelectedApplicationInterface()
+         ) {
+        if (DashboardFactory.getSelectedType().type === vm.constants.resourceType.DEVICE_TYPE) {
+          // The instance selected is a device... retrieve its state
+          retrieveDeviceState();
+        } else {
+          // The instance selected is a thing... retrieve its state
+          retrieveThingState();
+        }
+      }
+    } // retrieveState
 
     /**
      * Retrieve the state of the currently selected device.
      */
     function retrieveDeviceState() {
-      /*
-       * If the user has selected the application interface, device type and
-       * device, retrieve the current state of the selected device.
-       */
-      if (  DashboardFactory.getSelectedDeviceType()
-         && DashboardFactory.getSelectedDevice()
-         && DashboardFactory.getSelectedApplicationInterface()
-         ) {
-        DeviceType.getDeviceState(
-          {
-            typeId: DashboardFactory.getSelectedDeviceType().id,
-            deviceId: DashboardFactory.getSelectedDevice().deviceId,
-            appIntfId: DashboardFactory.getSelectedApplicationInterface().id
-          },
-          function(response) {
-            // Inject our own timestamp into the response
-            response.timestamp = Date.now();
-            vm.deviceStateData.push(response);
-          },
-          function(response) {
-            if (  response.status === 401
-               || response.status === 403
-                ) {
-               onUnauthorizedOrForbiddenResponse();
-             } else if (response.status === 404) {
-               onNoStateFoundResponse();
-             }
+      DeviceType.getDeviceState(
+        {
+          typeId: DashboardFactory.getSelectedType().id,
+          deviceId: DashboardFactory.getSelectedInstance().id,
+          appIntfId: DashboardFactory.getSelectedApplicationInterface().id
+        },
+        function(response) {
+          /*
+           * Normalise the response until the latest drivers have been
+           * deployed into production.
+           */
+          var data = {};
+          var now = Date.now();
+          if (!response.updated && !response.state) {
+            /*
+             * The data returned is in the old format... inject our own
+             * updated timestamp and store the state in a state property.
+             */
+            data.updated = now;
+            data.state = response; 
+          } else {
+            var updatedMillis = new Date(response.updated).getTime();
+            response.updated = updatedMillis;
+            data = response;
           }
-        );
-      }
+          data.timestamp = now;
+          vm.stateData.push(data);
+        },
+        function(response) {
+          if (  response.status === 401
+             || response.status === 403
+              ) {
+             onUnauthorizedOrForbiddenResponse();
+           } else if (response.status === 404) {
+             onNoStateFoundResponse();
+           }
+        }
+      );
     } // retrieveDeviceState
-    
+
+    /**
+     * Retrieve the state of the currently selected thing.
+     */
+    function retrieveThingState() {
+      ThingType.getThingState(
+        {
+          typeId: DashboardFactory.getSelectedType().id,
+          thingId: DashboardFactory.getSelectedInstance().id,
+          appIntfId: DashboardFactory.getSelectedApplicationInterface().id
+        },
+        function(response) {
+          /*
+           * Normalise the response until the latest drivers have been
+           * deployed into production.
+           */
+          var data = {};
+          var now = Date.now();
+          if (!response.updated && !response.state) {
+            /*
+             * The data returned is in the old format... inject our own
+             * updated timestamp and store the state in a state property.
+             */
+            data.updated = now;
+            data.state = response; 
+          } else {
+            var updatedMillis = new Date(response.updated).getTime();
+            response.updated = updatedMillis;
+            data = response;
+            
+          }
+          data.timestamp = now;
+          vm.stateData.push(data);
+        },
+        function(response) {
+          if (  response.status === 401
+             || response.status === 403
+              ) {
+             onUnauthorizedOrForbiddenResponse();
+           } else if (response.status === 404) {
+             onNoStateFoundResponse();
+           }
+        }
+      );
+    } // retrieveDeviceState
+
     /**
      * Called when a "403 Forbidden" is returned from a call to a Watson IoT
      * REST API. 
@@ -235,6 +309,5 @@
         }
       });
     } // onNoStateFoundResponse
-
   }
 })();

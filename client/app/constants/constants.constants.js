@@ -29,6 +29,15 @@
     var deviceEndpoint = devicesEndpoint + '/:deviceId';
     var deviceTypeApplicationInterfacesEndpoint = deviceTypesEndpoint + '/applicationinterfaces';
     var deviceStateEndpoint = deviceEndpoint + '/state/:appIntfId';
+    var thingTypesEndpoint = baseURL + '/thing/types/:typeId';
+    var thingsEndpoint = thingTypesEndpoint + '/things';
+    var thingEndpoint = thingsEndpoint + '/:thingId';
+    var thingTypeApplicationInterfacesEndpoint = thingTypesEndpoint + '/applicationinterfaces';
+    var thingStateEndpoint = thingEndpoint + '/state/:appIntfId';
+    var resourceType = {
+      'DEVICE_TYPE': 'DEVICE_TYPE',
+      'THING_TYPE': 'THING_TYPE',
+    };
     var httpHeaders = {
       'authorization': 'Authorization'
     };
@@ -45,6 +54,12 @@
         'deviceEndpoint': devicesEndpoint,
         'deviceTypeApplicationInterfacesEndpoint': deviceTypeApplicationInterfacesEndpoint,
         'deviceStateEndpoint': deviceStateEndpoint,
+        'thingTypesEndpoint': thingTypesEndpoint,
+        'thingsEndpoint': thingsEndpoint,
+        'thingEndpoint': thingEndpoint,
+        'thingTypeApplicationInterfacesEndpoint': thingTypeApplicationInterfacesEndpoint,
+        'thingStateEndpoint': thingStateEndpoint,
+        'resourceType': resourceType,
         'httpHeaders': httpHeaders,
         'misc': misc
     };

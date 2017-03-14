@@ -51,13 +51,13 @@
       );
       $scope.$watch(
         function() {
-          return DashboardFactory.getSelectedDeviceType();
+          return DashboardFactory.getSelectedType();
         },
         onSelectedDeviceOrThingChanged
       );
       $scope.$watch(
         function() {
-          return DashboardFactory.getSelectedDevice();
+          return DashboardFactory.getSelectedInstance();
         },
         onSelectedDeviceOrThingChanged
       );
@@ -96,8 +96,8 @@
      */
     function onSelectedDeviceOrThingChanged() {
       if (   DashboardFactory.getSelectedApplicationInterface()
-          && DashboardFactory.getSelectedDeviceType()
-          && DashboardFactory.getSelectedDevice()
+          && DashboardFactory.getSelectedType()
+          && DashboardFactory.getSelectedInstance()
          ) {
         ActionToast.hide();
       } else {

@@ -13,14 +13,15 @@
   DashboardFactory.$inject = ['$http', 'Constants'];
 
   function DashboardFactory($http, Constants) {
-    // TODO: REMOVE BEFORE PUSHING TO GIT
     var apiKey = null;
     var authenticationToken = null;
     var applicationInterface = null;
     var deviceType = null;
     var device = null;
     var updatesEnabled = true;
-
+    var type = null;
+    var instance = null;
+    
     var factory = {
       setApiKey: setApiKey,
       getApiKey: getApiKey,
@@ -28,10 +29,10 @@
       getAuthenticationToken: getAuthenticationToken,
       getSelectedApplicationInterface: getSelectedApplicationInterface,
       setSelectedApplicationInterface: setSelectedApplicationInterface,
-      getSelectedDeviceType: getSelectedDeviceType,
-      setSelectedDeviceType: setSelectedDeviceType,
-      getSelectedDevice: getSelectedDevice,
-      setSelectedDevice: setSelectedDevice,
+      getSelectedType: getSelectedType,
+      setSelectedType: setSelectedType,
+      getSelectedInstance: getSelectedInstance,
+      setSelectedInstance: setSelectedInstance,
       getUpdatesEnabled: getUpdatesEnabled,
       setUpdatesEnabled: setUpdatesEnabled
     };
@@ -82,31 +83,31 @@
     }
 
     /**
-     * Returns the selected device type
+     * Returns the selected device or thing type
      */
-    function getSelectedDeviceType() {
-      return deviceType;
+    function getSelectedType() {
+      return type;
     }
 
     /**
-     * Sets the selected device type
+     * Sets the selected device or thing type
      */
-    function setSelectedDeviceType(newDeviceType) {
-      deviceType = newDeviceType;
+    function setSelectedType(newType) {
+      type = newType;
     }
 
     /**
-     * Returns the selected device
+     * Returns the selected device or thing instance
      */
-    function getSelectedDevice() {
-      return device;
+    function getSelectedInstance() {
+      return instance;
     }
 
     /**
-     * Sets the selected device
+     * Sets the selected device or thing instance
      */
-    function setSelectedDevice(newDevice) {
-      device = newDevice;
+    function setSelectedInstance(newInstance) {
+      instance = newInstance;
     }
 
     /**

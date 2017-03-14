@@ -31,11 +31,9 @@
                 var lineGenerator = d3.svg.line()
                     .interpolate("monotone") // Smooth the line
                     .x(function(d) { return xRange(d.timestamp); })
-                    .y(function(d) { return yRange(d[property.name]);});
+                    .y(function(d) { return yRange(d.state[property.name]);});
                 lineGenerators[property.name] = lineGenerator;
-
                 scope.createLine(property, index);
-
               }
             );
           } // createLineGenerators
@@ -166,11 +164,9 @@
            */
           scope.getDomainEndTime = function() {
             var endTime = sessionStartTime;
-            if (scope.data) {
-              if (scope.data.length > 0) {
-                var datum = scope.data[scope.data.length - 1];
-                endTime = datum.timestamp;
-              }
+            if (scope.data && scope.data.length > 0) {
+              var datum = scope.data[scope.data.length - 1];
+              endTime = datum.timestamp + (scope.refreshInterval / 2);
             }
 
             return endTime;
@@ -209,7 +205,7 @@
                         return xRange(d.timestamp + scope.refreshInterval);
                       })
                       .attr("cy", function(d) {
-                        return yRange(d[property.name]);
+                        return yRange(d.state[property.name]);
                       })
                       .attr("transform", null)
                       .attr("fill", function() {
@@ -219,7 +215,7 @@
                         return colorScale[index];
                       })
                       .on("mouseover", function(d) {
-                        tooltip.html(d[property.name])
+                        tooltip.html(d.state[property.name])
                           .style("left", (d3.event.pageX) + "px")
                           .style("top", (d3.event.pageY - 28) + "px")
                           .style("opacity", .9);
@@ -255,7 +251,7 @@
           scope.refresh = function() {
             var currentDomain = xRange.domain();
             var currentStartTime = currentDomain[0];
-            var yMax = 0;
+//            var yMax = 0;
 
             // Animate the changes using a transition
             var t = chart.transition()
@@ -283,30 +279,30 @@
                * We need to do this before updating any lines so that the lines
                * are drawn to the correct scale.
                */
-              for (var index = 0; index < scope.properties.length; index++) {
-                var property = scope.properties[index];
-                /*
-                 * Make sure that the line for the current property is vislble
-                 * by selecting the line making sure that it is not empty. 
-                 */
-                var line = chart.select("#" + property.name + '_line');
-                if (!line.empty()) {
-                  var propertyMax = d3.max(scope.data, function(d) { return d[property.name]; });
-                  if (propertyMax > yMax) {
-                    yMax = propertyMax;
-                  }
-                }
-              } // FOR
+//              for (var index = 0; index < scope.properties.length; index++) {
+//                var property = scope.properties[index];
+//                /*
+//                 * Make sure that the line for the current property is vislble
+//                 * by selecting the line making sure that it is not empty. 
+//                 */
+//                var line = chart.select("#" + property.name + '_line');
+//                if (!line.empty()) {
+//                  var propertyMax = d3.max(scope.data, function(d) { return d.state[property.name]; });
+//                  if (propertyMax > yMax) {
+//                    yMax = propertyMax;
+//                  }
+//                }
+//              } // FOR
 
               // Now that we have the maximum y value, update the y axis
-              if (yMax > 0) {
-                var yDomainMax = yMax * 1.1; // Add on 10%
-                if (yDomainMax > 1) {
-                  yDomainMax = Math.round(yDomainMax);
-                }
-                yRange.domain([0, yDomainMax]).nice();
-                t.select(".y.DeviceStateChartAxis").call(yAxis);
-              } // IF - yMax > 0
+//              if (yMax > 0) {
+//                var yDomainMax = yMax * 1.1; // Add on 10%
+//                if (yDomainMax > 1) {
+//                  yDomainMax = Math.round(yDomainMax);
+//                }
+//                yRange.domain([0, yDomainMax]).nice();
+//                t.select(".y.DeviceStateChartAxis").call(yAxis);
+//              } // IF - yMax > 0
 
               // Now update each of the lines on the chart.
               for (var index = 0; index < scope.properties.length; index++) {
@@ -325,7 +321,7 @@
                     return xRange(d.timestamp);
                   })
                   .attr("cy", function(d) {
-                    return yRange(d[property.name]);
+                    return yRange(d.state[property.name]);
                   })
                   .attr("transform", null);
               } // FOR

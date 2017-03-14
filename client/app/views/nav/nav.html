@@ -18,21 +18,21 @@
     </md-input-container>
 
     <md-input-container class="md-block">
-      <label>Device Type</label>
-      <md-select data-ng-model="vm.deviceType" data-ng-model-options="{trackBy: '$value.id'}" data-ng-disabled="vm.deviceTypes.length === 0">
+      <label>Device/Thing Type</label>
+      <md-select data-ng-model="vm.type" data-ng-model-options="{trackBy: '$value.id'}" data-ng-disabled="vm.types.length === 0">
         <md-option><em>None</em></md-option>
-        <md-option data-ng-repeat="deviceType in vm.deviceTypes" data-ng-value="deviceType">
-          {{ deviceType.id }}
+        <md-option data-ng-repeat="type in vm.types" data-ng-value="type">
+          {{ type.id }}
         </md-option>
       </md-select>
     </md-input-container>
 
     <md-input-container class="md-block">
-      <label>Device</label>
-      <md-select data-ng-model="vm.device" data-ng-model-options="{trackBy: '$value.deviceId'}" data-ng-disabled="vm.devices.length === 0">
+      <label>Device/Thing</label>
+      <md-select data-ng-model="vm.instance" data-ng-model-options="{trackBy: '$value.id'}" data-ng-disabled="vm.instances.length === 0">
         <md-option><em>None</em></md-option>
-        <md-option data-ng-repeat="device in vm.devices" data-ng-value="device">
-          {{ device.deviceId }}
+        <md-option data-ng-repeat="instance in vm.instances" data-ng-value="instance">
+          {{ instance.id }}
         </md-option>
       </md-select>
     </md-input-container>
