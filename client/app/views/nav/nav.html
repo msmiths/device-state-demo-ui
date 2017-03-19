@@ -32,7 +32,7 @@
       <md-select data-ng-model="vm.instance" data-ng-model-options="{trackBy: '$value.id'}" data-ng-disabled="vm.instances.length === 0">
         <md-option><em>None</em></md-option>
         <md-option data-ng-repeat="instance in vm.instances" data-ng-value="instance">
-          {{ instance.id }}
+          {{ instance.name ? instance.name : instance.id }}
         </md-option>
       </md-select>
     </md-input-container>
