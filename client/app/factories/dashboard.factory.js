@@ -136,7 +136,7 @@
      */
     function getMQTTEndpoint() {
       var orgId = apiKey.substr(2, 6);
-      return `wss://${orgId}.messaging.internetofthings.ibmcloud.com/mqtt`;
+      return 'wss://' + orgId + '.messaging.internetofthings.ibmcloud.com/mqtt';
     }
 
     /**
@@ -145,7 +145,7 @@
      */
     function getMQTTClientId() {
       var orgId = apiKey.substr(2, 6);
-      return `a:${orgId}:${apiKey}`;
+      return 'a:' + orgId + ':' + apiKey;
     }
 
     /**
@@ -156,8 +156,9 @@
     function getDeviceStateNotificationTopic() {
       var deviceStateTopic = null;
       if (logicalInterface && type && instance) {
-        deviceStateTopic = `iot-2/type/${type.id}/id/${instance.id}/intf/${logicalInterface.id}/evt/state`;
+        deviceStateTopic = 'iot-2/type/' + type.id + '/id/' + instance.id + '/intf/' + logicalInterface.id + '/evt/state';
       }
+      console.log('deviceStateTopic: ' + deviceStateTopic);
       return deviceStateTopic;
     }
 
@@ -169,8 +170,9 @@
     function getDeviceStateErrorTopic() {
       var deviceStateErrorTopic = null;
       if (logicalInterface && type && instance) {
-        deviceStateErrorTopic = `iot-2/type/${type.id}/id/${instance.id}/err/data`;
+        deviceStateErrorTopic = 'iot-2/type/' + type.id + '/id/' + instance.id + '/err/data';
       }
+      console.log('deviceStateErrorTopic: ' + deviceStateErrorTopic);
       return deviceStateErrorTopic;
     }
 
@@ -181,8 +183,9 @@
     function getRuleNotificationTopic() {
       var ruleTriggerNotificationTopic = null;
       if (logicalInterface) {
-        ruleTriggerNotificationTopic = `iot-2/intf/${logicalInterface.id}/rule/+/evt/trigger`;
+        ruleTriggerNotificationTopic = 'iot-2/intf/' + logicalInterface.id + '/rule/+/evt/trigger';
       }
+      console.log('ruleTriggerNotificationTopic: ' + ruleTriggerNotificationTopic);
       return ruleTriggerNotificationTopic;
     }
 
@@ -193,8 +196,9 @@
     function getRuleErrorTopic() {
       var ruleErrorTopic = null;
       if (logicalInterface && type && instance) {
-        ruleErrorTopic = `iot-2/intf/${logicalInterface.id}/rule/+/err/data`;
+        ruleErrorTopic = 'iot-2/intf/' + logicalInterface.id + '/rule/+/err/data';
       }
+      console.log('ruleErrorTopic: ' + ruleErrorTopic);
       return ruleErrorTopic;
     }
 

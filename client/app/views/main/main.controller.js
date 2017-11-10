@@ -380,7 +380,7 @@
         },
         function(rule) {
           RuleNotificationToast.show({
-            message: `The \`${rule.name}\' rule has been triggered`,
+            message: 'The \'' + rule.name +'\' rule has been triggered',
             ruleCondition: rule.condition,
             notificationPayload: payload
           });
