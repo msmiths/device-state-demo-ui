@@ -20,6 +20,8 @@ var cfenv = require('cfenv');
 // Retrieve the configuration for the environment
 var config = require('./config/environment');
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 /*
  * Setup the server to proxy requests that begin with /api/v0002 to the Watson
  * IoT organization configured for the environment.  When running in Bluemix,
@@ -28,6 +30,10 @@ var config = require('./config/environment');
  */
 process.env.WIOT_ORG_ID = process.env.WIOT_ORG_ID || config.WIOT_ORG_ID;
 process.env.WIOT_DOMAIN = process.env.WIOT_DOMAIN || config.WIOT_DOMAIN;
+
+console.log('process.env.WIOT_ORG_ID: %s ', process.env.WIOT_ORG_ID);
+console.log('process.env.WIOT_DOMAIN: %s ', process.env.WIOT_DOMAIN);
+
 var app = express();
 app.use('/api/v0002', proxy(process.env.WIOT_ORG_ID + '.' + process.env.WIOT_DOMAIN, {
   https: true,

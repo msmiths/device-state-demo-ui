@@ -45,21 +45,21 @@
        */
       $scope.$watch(
         function() {
-          return DashboardFactory.getSelectedApplicationInterface();
+          return DashboardFactory.getSelectedLogicalInterface();
         },
-        onSelectedDeviceOrThingChanged
+        onSelectedInstanceChanged
       );
       $scope.$watch(
         function() {
           return DashboardFactory.getSelectedType();
         },
-        onSelectedDeviceOrThingChanged
+        onSelectedInstanceChanged
       );
       $scope.$watch(
         function() {
           return DashboardFactory.getSelectedInstance();
         },
-        onSelectedDeviceOrThingChanged
+        onSelectedInstanceChanged
       );
     } // activate
     
@@ -84,26 +84,26 @@
             CredentialsDialog.show(event);
           },
           closeCallback: function() {
-            onSelectedDeviceOrThingChanged();
+            onSelectedInstanceChanged();
           }
         });
       }
     }
     
     /**
-     * Called when the user modifies the selected device/thing that they want
-     * to view the state for.
+     * Called when the user modifies the selected device that they want to view
+     * the state for.
      */
-    function onSelectedDeviceOrThingChanged() {
-      if (   DashboardFactory.getSelectedApplicationInterface()
+    function onSelectedInstanceChanged() {
+      if (   DashboardFactory.getSelectedLogicalInterface()
           && DashboardFactory.getSelectedType()
           && DashboardFactory.getSelectedInstance()
          ) {
         ActionToast.hide();
       } else {
         ActionToast.show({
-          message: 'Now you need to select the Device or Thing whose state you want to view.',
-          actionMessage: 'Show Device/Thing Selector',
+          message: 'Now you need to select the Device whose state you want to view.',
+          actionMessage: 'Show Device Selector',
           actionCallback: function(event) {
             $mdSidenav('left').toggle();
           }

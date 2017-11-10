@@ -83,10 +83,26 @@ md-toast .md-toast-content {
   padding: 10px 0 10px 18px;
 }
 
+md-toast.rule-notification-toast .md-toast-content {
+  max-height: 900px;
+  max-width: 900px;
+}
+
 .md-toast .md-button {
   margin-right: 12px;
 }
 
 .md-button.md-icon-button md-icon {
   color: #FFFFFF;
+}
+
+g.tick {
+  font-size: 14px;
+}
+
+pre {
+  background: none;
+  color: #FAFAFA;
+  padding: 5px;
+  margin: 5px;
 }

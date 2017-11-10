@@ -15,7 +15,7 @@
   function DashboardFactory($http, Constants) {
     var apiKey = null;
     var authenticationToken = null;
-    var applicationInterface = null;
+    var logicalInterface = null;
     var deviceType = null;
     var device = null;
     var updatesEnabled = true;
@@ -27,14 +27,20 @@
       getApiKey: getApiKey,
       setAuthenticationToken: setAuthenticationToken,
       getAuthenticationToken: getAuthenticationToken,
-      getSelectedApplicationInterface: getSelectedApplicationInterface,
-      setSelectedApplicationInterface: setSelectedApplicationInterface,
+      getSelectedLogicalInterface: getSelectedLogicalInterface,
+      setSelectedLogicalInterface: setSelectedLogicalInterface,
       getSelectedType: getSelectedType,
       setSelectedType: setSelectedType,
       getSelectedInstance: getSelectedInstance,
       setSelectedInstance: setSelectedInstance,
       getUpdatesEnabled: getUpdatesEnabled,
-      setUpdatesEnabled: setUpdatesEnabled
+      setUpdatesEnabled: setUpdatesEnabled,
+      getMQTTEndpoint: getMQTTEndpoint,
+      getMQTTClientId: getMQTTClientId,
+      getDeviceStateNotificationTopic: getDeviceStateNotificationTopic,
+      getDeviceStateErrorTopic: getDeviceStateErrorTopic,
+      getRuleNotificationTopic: getRuleNotificationTopic,
+      getRuleErrorTopic: getRuleErrorTopic
     };
     return factory;
 
@@ -69,42 +75,42 @@
     }
 
     /**
-     * Returns the selected application interface
+     * Returns the selected logical interface
      */
-    function getSelectedApplicationInterface() {
-      return applicationInterface;
+    function getSelectedLogicalInterface() {
+      return logicalInterface;
     }
 
     /**
-     * Sets the selected application interface
+     * Sets the selected logical interface
      */
-    function setSelectedApplicationInterface(newApplicationInterface) {
-      applicationInterface = newApplicationInterface;
+    function setSelectedLogicalInterface(newLogicalInterface) {
+      logicalInterface = newLogicalInterface;
     }
 
     /**
-     * Returns the selected device or thing type
+     * Returns the selected device type
      */
     function getSelectedType() {
       return type;
     }
 
     /**
-     * Sets the selected device or thing type
+     * Sets the selected device type
      */
     function setSelectedType(newType) {
       type = newType;
     }
 
     /**
-     * Returns the selected device or thing instance
+     * Returns the selected device instance
      */
     function getSelectedInstance() {
       return instance;
     }
 
     /**
-     * Sets the selected device or thing instance
+     * Sets the selected device instance
      */
     function setSelectedInstance(newInstance) {
       instance = newInstance;
@@ -122,6 +128,74 @@
      */
     function setUpdatesEnabled(newUpdatesEnabled) {
       updatesEnabled = newUpdatesEnabled;
+    }
+
+    /**
+     * Returns the mqttEndpoint... calculated based on the orgId contained in
+     * the API key
+     */
+    function getMQTTEndpoint() {
+      var orgId = apiKey.substr(2, 6);
+      return `wss://${orgId}.messaging.internetofthings.ibmcloud.com/mqtt`;
+    }
+
+    /**
+     * Returns the mqtt client id... calculated based on the orgId contained
+     * in the API key
+     */
+    function getMQTTClientId() {
+      var orgId = apiKey.substr(2, 6);
+      return `a:${orgId}:${apiKey}`;
+    }
+
+    /**
+     * Returns the MQTT topic that device state update notifications are
+     * published to... calculated based on the selected logical interface,
+     * type and instance.
+     */
+    function getDeviceStateNotificationTopic() {
+      var deviceStateTopic = null;
+      if (logicalInterface && type && instance) {
+        deviceStateTopic = `iot-2/type/${type.id}/id/${instance.id}/intf/${logicalInterface.id}/evt/state`;
+      }
+      return deviceStateTopic;
+    }
+
+    /**
+     * Returns the MQTT topic that device state error notifications are
+     * published to... calculated based on the selected logical interface,
+     * type and instance.
+     */
+    function getDeviceStateErrorTopic() {
+      var deviceStateErrorTopic = null;
+      if (logicalInterface && type && instance) {
+        deviceStateErrorTopic = `iot-2/type/${type.id}/id/${instance.id}/err/data`;
+      }
+      return deviceStateErrorTopic;
+    }
+
+    /**
+     * Returns the MQTT topic that rule trigger notifications are published
+     * to... calculated based on the selected logical interface.
+     */
+    function getRuleNotificationTopic() {
+      var ruleTriggerNotificationTopic = null;
+      if (logicalInterface) {
+        ruleTriggerNotificationTopic = `iot-2/intf/${logicalInterface.id}/rule/+/evt/trigger`;
+      }
+      return ruleTriggerNotificationTopic;
+    }
+
+    /**
+     * Returns the MQTT topic that rule error notifications are published
+     * to... calculated based on the selected logical interface.
+     */
+    function getRuleErrorTopic() {
+      var ruleErrorTopic = null;
+      if (logicalInterface && type && instance) {
+        ruleErrorTopic = `iot-2/intf/${logicalInterface.id}/rule/+/err/data`;
+      }
+      return ruleErrorTopic;
     }
 
     function updateAuthorizationHeader() {

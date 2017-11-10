@@ -5,12 +5,13 @@
   .module('demouiApp.dialogs')
   .controller('CredentialsDialogController', CredentialsDialogController);
 
-  CredentialsDialogController.$inject = ['$scope', '$window', '$mdDialog', 'DashboardFactory'];
+  CredentialsDialogController.$inject = ['$scope', '$window', '$mdDialog', 'Constants', 'DashboardFactory'];
 
-  function CredentialsDialogController($scope, $window, $mdDialog, DashboardFactory) {
+  function CredentialsDialogController($scope, $window, $mdDialog, Constants, DashboardFactory) {
     /*jshint validthis: true */
     var vm = this;
 
+    vm.constants = Constants;
     vm.apiKey = null;
     vm.authToken = null;
 

@@ -1,5 +1,5 @@
 <div class="row">
-  <h1 data-ng-show="vm.applicationInterface">{{ vm.applicationInterface.name }} State</h1>
+  <h1 data-ng-show="vm.logicalInterface">{{ vm.logicalInterface.name }} State</h1>
   <h2 data-ng-show="vm.type && vm.instance">For the {{ vm.type.id }} {{ vm.type.type == vm.constants.resourceType.DEVICE_TYPE ? 'device' : 'thing' }} {{ vm.instance.name ? vm.instance.name : vm.instance.id }}</h2>
   <div id="chartContainer" class="device-state-data-chart-container">
     <d3-chart data="vm.stateData" properties="vm.numericSchemaProperties" refresh-interval="vm.chartRefreshInterval" interaction-controller="vm.chartController" id="chart" class="DeviceStateChart"></d3-chart>
@@ -19,7 +19,7 @@
         <td style="background-color: {{ vm.colorScale[$index] }}"></td>
         <td><input type="checkbox" checked="checked" data-ng-click="vm.chartController.toggleLine($event, property.name)"></td>
         <td>{{ property.name }}</td>
-        <td>{{ vm.stateData[vm.stateData.length - 1].state[property.name] }}</td>
+        <td>{{ vm.stateData[vm.stateData.length - 1].state[property.name].toFixed(2) }}</td>
       </tr>
     </table>
   </div>

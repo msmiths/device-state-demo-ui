@@ -13,7 +13,7 @@
       {
         typeId: '@typeId',
         deviceId: '@deviceId',
-        appIntfId: '@appIntfId'
+        logicalIntfId: '@logicalIntfId'
       }, {
         update : {
           method : 'PUT'
@@ -26,10 +26,10 @@
           method: 'GET',
           url: Constants.devicesEndpoint
         },
-        getApplicationInterfaces: {
+        getLogicalInterfaces: {
           method: 'GET',
           isArray: true,
-          url: Constants.deviceTypeApplicationInterfacesEndpoint
+          url: Constants.deviceTypeLogicalInterfacesEndpoint
         },
         getDeviceState: {
           method: 'GET',

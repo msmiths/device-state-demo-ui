@@ -13,7 +13,8 @@
     "angular-material": "latest",
     "lodash": "~4.17.4",
     "angular-ui-router": "~0.4.2",
-    "font-awesome": ">=4.1.0"
+    "font-awesome": ">=4.1.0",
+    "paho-mqtt": "latest"
   },
   "devDependencies": {
     "angular-mocks": "^1.4.0",

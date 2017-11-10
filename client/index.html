@@ -8,7 +8,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <base href="/">
-    <title>Watson IoT Device and Thing State Demo</title>
+    <title>Watson IoT Device State Demo</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
@@ -34,7 +34,9 @@
     <div data-ng-include="'app/layout/shell.html'"></div>
 
     <!-- Include the D3 library -->
-    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+   <!-- <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script> -->
+   <!-- <script src="https://d3js.org/d3.v4.min.js" charset="utf-8"></script> -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.5.0/d3.min.js" charset="utf-8"></script>
 
     <!--[if lt IE 9]>
     <script src="bower_components/es5-shim/es5-shim.js"></script>
@@ -54,6 +56,7 @@
       <script src="../bower_components/angular-material/angular-material.js"></script>
       <script src="../bower_components/lodash/lodash.js"></script>
       <script src="../bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+      <script src="../bower_components/paho-mqtt/src/mqttws31.js"></script>
       <!-- endbower -->
     <!-- endbuild -->
 
@@ -74,13 +77,18 @@
     <script src="app/factories/factories.module.js"></script>
     <script src="app/factories/dashboard.factory.js"></script>
     <script src="app/resources/resources.module.js"></script>
-    <script src="app/resources/applicationinterface.resource.js"></script>
+    <script src="app/resources/logicalinterface.resource.js"></script>
+    <script src="app/resources/draftdevicetype.resource.js"></script>
     <script src="app/resources/devicetype.resource.js"></script>
-    <script src="app/resources/thingtype.resource.js"></script>
+    <script src="app/resources/rule.resource.js"></script>
     <script src="app/resources/schema.resource.js"></script>
     <script src="app/toasts/toasts.module.js"></script>
     <script src="app/toasts/ActionToast/action.toast.factory.js"></script>
     <script src="app/toasts/ActionToast/action.toast.controller.js"></script>
+    <script src="app/toasts/ErrorNotificationToast/error.notification.toast.factory.js"></script>
+    <script src="app/toasts/ErrorNotificationToast/error.notification.toast.controller.js"></script>
+    <script src="app/toasts/RuleNotificationToast/rule.notification.toast.factory.js"></script>
+    <script src="app/toasts/RuleNotificationToast/rule.notification.toast.controller.js"></script>
     <script src="app/views/main/main.module.js"></script>
     <script src="app/views/main/main.controller.js"></script>
     <script src="app/views/nav/nav.module.js"></script>

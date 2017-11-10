@@ -1,0 +1,14 @@
+<md-toast class="rule-notification-toast">
+  <div class="md-toast-text" flex>
+    <div>{{ vm.message }}</div>
+  </div>
+  <div class="md-toast-text" flex>
+    <label>Error Message:</label>
+    <pre>{{ vm.errorMessage }}></pre>
+    <label>Event Payload:</label>
+    <pre class="md-toast-text">{{ vm.formattedEventPayload }}</pre>
+  </div>
+  <md-button class="md-icon-button" data-ng-click="vm.closeToast()">
+    <md-icon md-svg-src="app/images/close.svg" aria-label="Close"></md-icon>
+  </md-button>
+</md-toast>

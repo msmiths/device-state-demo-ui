@@ -14,54 +14,56 @@
     .constant('Constants', constants()); // Dashboard constants
 
   function constants() {
-    /*
-     * Calculate the hostNameSuffix from the window.location.host.  Remember
-     * that the value of the base Javascript window.location.host attribute
-     * contains the host AND port, not just the hostname.
-     */
     var baseURL = '/api/v0002';
+    var draftBaseURL = baseURL + '/draft';
     var schemaEndpoint = baseURL + '/schemas/:schemaId';
     var schemaContentEndpoint = baseURL + '/schemas/:schemaId/content';
-    var applicationInterfaceEndpoint = baseURL + '/applicationinterfaces/:appIntfId';
-    var applicationInterfaceSchemaEndpoint = applicationInterfaceEndpoint + '/schema';
+    var logicalInterfaceEndpoint = baseURL + '/logicalinterfaces/:logicalIntfId';
+    var logicalInterfaceSchemaEndpoint = logicalInterfaceEndpoint + '/schema';
+    var ruleEndpoint = logicalInterfaceEndpoint + '/rules/:ruleId';
+    var draftDeviceTypesEndpoint = draftBaseURL + '/device/types/:typeId';
     var deviceTypesEndpoint = baseURL + '/device/types/:typeId';
     var devicesEndpoint = deviceTypesEndpoint + '/devices';
     var deviceEndpoint = devicesEndpoint + '/:deviceId';
-    var deviceTypeApplicationInterfacesEndpoint = deviceTypesEndpoint + '/applicationinterfaces';
-    var deviceStateEndpoint = deviceEndpoint + '/state/:appIntfId';
-    var thingTypesEndpoint = baseURL + '/thing/types/:typeId';
-    var thingsEndpoint = thingTypesEndpoint + '/things';
-    var thingEndpoint = thingsEndpoint + '/:thingId';
-    var thingTypeApplicationInterfacesEndpoint = thingTypesEndpoint + '/applicationinterfaces';
-    var thingStateEndpoint = thingEndpoint + '/state/:appIntfId';
+    var draftDeviceTypeLogicalInterfacesEndpoint = draftDeviceTypesEndpoint + '/logicalinterfaces';
+    var deviceTypeLogicalInterfacesEndpoint = deviceTypesEndpoint + '/logicalinterfaces';
+    var deviceStateEndpoint = deviceEndpoint + '/state/:logicalIntfId';
     var resourceType = {
-      'DEVICE_TYPE': 'DEVICE_TYPE',
-      'THING_TYPE': 'THING_TYPE',
+      DEVICE_TYPE: 'DEVICE_TYPE'
     };
     var httpHeaders = {
-      'authorization': 'Authorization'
+      authorization: 'Authorization'
+    };
+    var apiKeyRegex = '[a]-[a-z0-9]{6}-[a-z0-9]{10}';
+    var ruleIdRegex = /[iot\-2\/intf\/[a-z0-9]{24}\/rule\/([a-z0-9]{24})\/evt\/trigger/;
+    var mqttDestinationNameSuffix = {
+      StateNotification: '/evt/state',
+      RuleNotification: '/evt/trigger',
+      ErrorNotification: '/err/data'
     };
     var misc = {
-      'basic': 'Basic '
+      basic: 'Basic '
     };
 
     var factory = {
-        'schemaEndpoint': schemaEndpoint,
-        'schemaContentEndpoint': schemaContentEndpoint,
-        'applicationInterfaceEndpoint': applicationInterfaceEndpoint,
-        'deviceTypesEndpoint': deviceTypesEndpoint,
-        'devicesEndpoint': devicesEndpoint,
-        'deviceEndpoint': devicesEndpoint,
-        'deviceTypeApplicationInterfacesEndpoint': deviceTypeApplicationInterfacesEndpoint,
-        'deviceStateEndpoint': deviceStateEndpoint,
-        'thingTypesEndpoint': thingTypesEndpoint,
-        'thingsEndpoint': thingsEndpoint,
-        'thingEndpoint': thingEndpoint,
-        'thingTypeApplicationInterfacesEndpoint': thingTypeApplicationInterfacesEndpoint,
-        'thingStateEndpoint': thingStateEndpoint,
-        'resourceType': resourceType,
-        'httpHeaders': httpHeaders,
-        'misc': misc
+        schemaEndpoint: schemaEndpoint,
+        schemaContentEndpoint: schemaContentEndpoint,
+        logicalInterfaceEndpoint: logicalInterfaceEndpoint,
+        logicalInterfaceSchemaEndpoint: logicalInterfaceSchemaEndpoint,
+        ruleEndpoint: ruleEndpoint,
+        draftDeviceTypesEndpoint: draftDeviceTypesEndpoint,
+        deviceTypesEndpoint: deviceTypesEndpoint,
+        devicesEndpoint: devicesEndpoint,
+        deviceEndpoint: devicesEndpoint,
+        draftDeviceTypeLogicalInterfacesEndpoint: draftDeviceTypeLogicalInterfacesEndpoint,
+        deviceTypeLogicalInterfacesEndpoint: deviceTypeLogicalInterfacesEndpoint,
+        deviceStateEndpoint: deviceStateEndpoint,
+        resourceType: resourceType,
+        httpHeaders: httpHeaders,
+        apiKeyRegex: apiKeyRegex,
+        ruleIdRegex: ruleIdRegex,
+        mqttDestinationNameSuffix: mqttDestinationNameSuffix,
+        misc: misc
     };
 
     Object.freeze(factory);
