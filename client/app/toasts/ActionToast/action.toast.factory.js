@@ -21,31 +21,35 @@
      */
     function show(options) {
 
-      /*
-       * Create a new scope for the toast and initialize it with the data passed
-       * in the options object
-       */ 
-      var toastScope = $rootScope.$new();
-      toastScope.message = options.message;
-      toastScope.actionMessage = options.actionMessage;
-      toastScope.actionCallback = options.actionCallback;
-      toastScope.closeCallback = options.closeCallback;
-      
-      /*
-       * Now create the options object for the toast and initialize it with any
-       * options passed in the options object... using sensible defaults where
-       * appropriate.
-       */ 
-      var toastOptions = {
-        hideDelay: options.hideDelay || 0,
-        position: options.position || 'top right',
-        templateUrl: 'app/toasts/ActionToast/actionToast.html',
-        controller: 'ActionToastController',
-        controllerAs: 'vm',
-        scope: toastScope
-      };
+      // Make sure that this toast is not already open
       if (!toastOpen) {
         toastOpen = true;
+        
+        /*
+         * Create a new scope for the toast and initialize it with the data
+         *passed in the options object
+         */ 
+        var toastScope = $rootScope.$new();
+        toastScope.message = options.message;
+        toastScope.actionMessage = options.actionMessage;
+        toastScope.actionCallback = options.actionCallback;
+        toastScope.closeCallback = options.closeCallback;
+        
+        /*
+         * Now create the options object for the toast and initialize it with
+         * any options passed in the options object... using sensible defaults
+         * where appropriate.
+         */ 
+        var toastOptions = {
+          hideDelay: options.hideDelay || 0,
+          position: options.position || 'top right',
+          templateUrl: 'app/toasts/ActionToast/actionToast.html',
+          controller: 'ActionToastController',
+          controllerAs: 'vm',
+          scope: toastScope
+        };
+
+        // Show the toast
         $mdToast.show(toastOptions).then(function(response) {
           toastOpen = false;
           

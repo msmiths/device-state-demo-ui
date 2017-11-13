@@ -5,9 +5,9 @@
     .module('demouiApp.main')
     .controller('MainController', MainController);
 
-  MainController.$inject = ['$scope', '$http', '$q', '$interval', '$mdSidenav', 'Constants', 'DashboardFactory', 'Schema', 'DeviceType', 'Rule', 'ActionToast', 'ErrorNotificationToast', 'RuleNotificationToast', 'CredentialsDialog'];
+  MainController.$inject = ['$scope', '$http', '$q', '$interval', '$mdSidenav', 'Constants', 'DashboardFactory', 'Schema', 'DeviceType', 'Rule', 'ActionToast', 'ErrorNotificationDialog', 'RuleNotificationDialog', 'CredentialsDialog'];
 
-  function MainController($scope, $http, $q, $interval, $mdSidenav, Constants, DashboardFactory, Schema, DeviceType, Rule, ActionToast, ErrorNotificationToast, RuleNotificationToast, CredentialsDialog) {
+  function MainController($scope, $http, $q, $interval, $mdSidenav, Constants, DashboardFactory, Schema, DeviceType, Rule, ActionToast, ErrorNotificationDialog, RuleNotificationDialog, CredentialsDialog) {
     /*jshint validthis: true */
     var vm = this;
 
@@ -18,6 +18,7 @@
     vm.colorScale = d3.schemeCategory20;
     vm.logicalInterface = null;
     vm.logicalInterfaceSchema = null;
+    vm.rules = {};
     vm.numericSchemaProperties = [];
     vm.nonNumericSchemaProperties = [];
     vm.type = null;
@@ -148,6 +149,7 @@
       vm.type = null;
       vm.instance = null;
       vm.stateData = [];
+      vm.rules = {};
       
       // Now reset the chart
       vm.chartController.reset();
@@ -186,6 +188,34 @@
             if (  response.status === 401
                || response.status === 403
                ) {
+              onUnauthorizedOrForbiddenResponse();
+            }
+          }
+        );
+
+        // Retrieve the rules for the selected logical interface
+        Rule.query(
+          { 
+            logicalIntfId: vm.logicalInterface.id
+          },
+          function(rules) {
+            /*
+             * Convert the response into an associative array so that we can
+             * easily retrieve rules by their ids later.
+             */
+            rules.map(function(rule){
+              vm.rules[rule.id] = rule;
+            });
+          },
+          function(response) {
+            /*
+              * Check specifically for a 401 Unauthorized or a 403 Forbidden 
+              * response here.  This indicates that the credentials entered by
+              * the user are incorrect/invalid.  This should not happen since the
+              * user has just selected an logical interface, but we should
+              * handle it anyway.
+              */
+            if (  response.status === 401 || response.status === 403) {
               onUnauthorizedOrForbiddenResponse();
             }
           }
@@ -263,16 +293,46 @@
       console.log('Destination Name: ' + destinationName);
       console.log('Payload: ', payload);
 
-      // Determine the type of the notification
-      if (destinationName.endsWith(Constants.mqttDestinationNameSuffix.StateNotification)) {
-        onStateUpdateNotification(payload);
-      } else if (destinationName.endsWith(Constants.mqttDestinationNameSuffix.RuleNotification)) {
-        var ruleId = destinationName.match(Constants.ruleIdRegex)[1];
-        onRuleTriggerNotification(ruleId, payload);
-      } else if (destinationName.endsWith(Constants.mqttDestinationNameSuffix.ErrorNotification)) {
-        onErrorNotification(payload);      
-      }
-      
+      /*
+       * Determine the type of the notification and take the appropriate
+       * action. 
+       * 
+       * Because this code is being driven by the arrival of messages
+       * over MQTT, Angular is not aware of them.  We need to drive the
+       * actions inside the $scope.$apply function to ensure that the
+       * Angular digest loop is driven.
+       */
+      $scope.$apply(function() {
+        // Determine the type of the notification
+        if (destinationName.endsWith(Constants.mqttDestinationNameSuffix.StateNotification)) {
+          onStateUpdateNotification(payload);
+        } else if (destinationName.endsWith(Constants.mqttDestinationNameSuffix.RuleNotification)) {
+          var ruleId = destinationName.match(Constants.ruleIdRegex)[1];
+          onRuleTriggerNotification(ruleId, payload);
+        } else if (destinationName.endsWith(Constants.mqttDestinationNameSuffix.ErrorNotification)) {
+          // Retrieve the various pieces of metadta for the error notification
+          var type = null;
+          var typeId = null;
+          var instanceId = null;
+          var eventId = null;
+          var rule = null;
+          if (payload.ruleId) {
+            // This is rule evaluation error
+            type = payload.type;
+            typeId = payload.typeId;
+            instanceId = payload.instanceId;
+            rule = vm.rules[payload.ruleId];
+          } else {
+            // This is a more general runtime error
+            var type = Constants.misc.device;
+            var typeId = destinationName.match(Constants.errorTopicRegex)[1];
+            var instanceId = destinationName.match(Constants.errorTopicRegex)[2];
+            var eventId = payload.eventId;
+          }
+          onErrorNotification(type, typeId, instanceId, eventId, rule, payload);
+        }
+      });
+
     } // onMessage
 
     function onStateUpdateNotification(payload) {
@@ -280,19 +340,13 @@
       payload.updated = new Date(payload.updated).getTime();
       payload.timestamp = new Date(payload.timestamp).getTime();
       
-      /*
-      * Push the new payload object onto the stateData array.  We need to do
-      * this inside the $scope.$apply function to ensure that the Angular
-      * digest loop is driven.
-      */
-      $scope.$apply(function() {
-        vm.stateData.push(payload);
-      });
+      // Push the new payload object onto the stateData array.
+      vm.stateData.push(payload);
 
       /*
-      * We only display one minutes worth of data points.  Strip off the first
-      * element of the array if it is over a certain size.
-      */
+       * We only display one minutes worth of data points.  Strip off the first
+       * element of the array if it is over a certain size.
+       */
       if (vm.stateData.length > 65) {
         vm.stateData.shift();
       }
@@ -373,42 +427,29 @@
      */
     function onRuleTriggerNotification(ruleId, payload) {
       // Retrieve the metadta for the rule that has been triggered
-      Rule.get(
-        { 
-          logicalIntfId: DashboardFactory.getSelectedLogicalInterface().id,
-          ruleId: ruleId
+      var rule = vm.rules[ruleId];
+
+      ActionToast.show({
+        message: 'The \'' + rule.name +'\' rule has been triggered',
+        actionMessage: 'Show Details',
+        actionCallback: function(event) {
+          RuleNotificationDialog.show(event, rule, payload);
         },
-        function(rule) {
-          RuleNotificationToast.show({
-            message: 'The \'' + rule.name +'\' rule has been triggered',
-            ruleCondition: rule.condition,
-            notificationPayload: payload
-          });
-        },
-        function(response) {
-          /*
-            * Check specifically for a 401 Unauthorized or a 403 Forbidden 
-            * response here.  This indicates that the credentials entered by
-            * the user are incorrect/invalid.  This should not happen since the
-            * user has just selected an logical interface, but we should
-            * handle it anyway.
-            */
-          if (  response.status === 401
-              || response.status === 403
-              ) {
-            onUnauthorizedOrForbiddenResponse();
-          }
-        }
-      );
+        hideDelay: Constants.misc.defaultToastHideDelay
+      });
     } // onRuleTriggerNotification 
 
     /**
      * Called when an MQTT error notification event is received. 
      */
-    function onErrorNotification(payload) {
-      ErrorNotificationToast.show({
+    function onErrorNotification(type, typeId, instanceId, eventId, rule, payload) {
+      ActionToast.show({
         message: 'A runtime error has occurred when processing an event',
-        notificationPayload: payload
+        actionMessage: 'Show Details',
+        actionCallback: function(event) {
+          ErrorNotificationDialog.show(event, type, typeId, instanceId, eventId, rule, payload);
+        },
+        hideDelay: Constants.misc.defaultToastHideDelay
       });
     } // onRuleTriggerNotification 
 

@@ -35,14 +35,18 @@
       authorization: 'Authorization'
     };
     var apiKeyRegex = '[a]-[a-z0-9]{6}-[a-z0-9]{10}';
-    var ruleIdRegex = /[iot\-2\/intf\/[a-z0-9]{24}\/rule\/([a-z0-9]{24})\/evt\/trigger/;
+    var ruleIdRegex = /iot\-2\/intf\/[a-z0-9]{24}\/rule\/([a-z0-9]{24})\/evt\/trigger/;
+    var errorTopicRegex = /iot\-2\/type\/([A-Za-z0-9\-\_\.]{1,36})\/id\/([A-Za-z0-9\-\_\.]{1,36})\/err\/data/;
     var mqttDestinationNameSuffix = {
       StateNotification: '/evt/state',
       RuleNotification: '/evt/trigger',
       ErrorNotification: '/err/data'
     };
     var misc = {
-      basic: 'Basic '
+      device: 'device',
+      thing: 'thing',
+      basic: 'Basic ',
+      defaultToastHideDelay: 10000
     };
 
     var factory = {
@@ -62,6 +66,7 @@
         httpHeaders: httpHeaders,
         apiKeyRegex: apiKeyRegex,
         ruleIdRegex: ruleIdRegex,
+        errorTopicRegex: errorTopicRegex,
         mqttDestinationNameSuffix: mqttDestinationNameSuffix,
         misc: misc
     };

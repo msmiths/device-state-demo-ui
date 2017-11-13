@@ -1,0 +1,30 @@
+<md-dialog class="notification-dialog" aria-label="Rule Notification Dialog">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Rule Triggered</h2>
+      <span flex></span>
+      <md-button class="md-icon-button" data-ng-click="vm.closeDialog()">
+        <md-icon md-svg-src="app/images/close.svg" aria-label="Close dialog"></md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <md-dialog-content>
+    <div class="md-dialog-content">
+      <h2 class="md-title">{{ vm.rule.name }}</h2>
+      <div class="notification-property">
+        <label class="notification-property-label">Condition:</label>
+        <div>{{ vm.rule.condition }}</div>
+      </div>
+      <div class="notification-property">
+        <label class="notification-property-label">State:</label>
+        <textarea class="notification-textarea">{{ vm.formattedPayload }}</textarea>
+      </div>
+    </div>
+  </md-dialog-content>
+  <md-dialog-actions>
+    <md-button data-ng-click="vm.closeDialog()" class="md-primary">
+      Close
+    </md-button>
+  </md-dialog-actions>
+</md-dialog>

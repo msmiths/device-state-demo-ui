@@ -1,0 +1,43 @@
+<md-dialog class="notification-dialog" aria-label="Error Notification Dialog">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Runtime Error</h2>
+      <span flex></span>
+      <md-button class="md-icon-button" data-ng-click="vm.closeDialog()">
+        <md-icon md-svg-src="app/images/close.svg" aria-label="Close dialog"></md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <md-dialog-content>
+    <div class="md-dialog-content">
+      <h2 class="md-title">A runtime error occurred for the {{ vm.instanceId }} {{ vm.typeId }} {{ vm.type }}</h2>
+      <div class="notification-property">
+        <label class="notification-property-label">Message:</label>
+        <div>{{ vm.errorMessage }}</div>
+      </div>
+      <div class="notification-property" data-ng-if="vm.eventId">
+        <label class="notification-property-label">Event Id:</label>
+        <div>{{ vm.eventId }}</div>
+      </div>
+      <div class="notification-property" data-ng-if="vm.rule">
+        <label class="notification-property-label">Rule Name:</label>
+        <div>{{ vm.rule.name }}</div>
+      </div>
+      <div class="notification-property" data-ng-if="vm.rule">
+        <label class="notification-property-label">Rule Condition:</label>
+        <div>{{ vm.rule.condition }}</div>
+      </div>
+      <div class="notification-property">
+        <label class="notification-property-label" data-ng-if="vm.eventId">Event:</label>
+        <label class="notification-property-label" data-ng-if="!vm.eventId">State:</label>
+        <textarea class="notification-textarea">{{ vm.formattedPayload }}</textarea>
+      </div>
+    </div>
+  </md-dialog-content>
+  <md-dialog-actions>
+    <md-button data-ng-click="vm.closeDialog()" class="md-primary">
+      Close
+    </md-button>
+  </md-dialog-actions>
+</md-dialog>
