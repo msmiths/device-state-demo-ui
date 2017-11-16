@@ -141,21 +141,23 @@
      * interface and process the properties that it defines.
      */
     function onLogicalInterfaceSelected() {
-      // First, reset the relevant view-model variables
-      vm.logicalInterface = null;
+      // First, unsubcribe from any previous MQTT topics
+      manageMqttSubscriptions(false);
+
+      // Now, reset the relevant view-model variables
+      vm.logicalInterface = DashboardFactory.getSelectedLogicalInterface();
       vm.logicalInterfaceSchema = null;
       vm.numericSchemaProperties = [];
       vm.nonNumericSchemaProperties = [];
-      vm.type = null;
-      vm.instance = null;
+      vm.type = DashboardFactory.getSelectedType();
+      vm.instance = DashboardFactory.getSelectedInstance();
       vm.stateData = [];
       vm.rules = {};
       
-      // Now reset the chart
+      // Reset the chart
       vm.chartController.reset();
       
-      // Retrieve the selected logical interface
-      vm.logicalInterface = DashboardFactory.getSelectedLogicalInterface();
+      // Make sure that a logical interface is selected
       if (vm.logicalInterface) {
         // Retrieve the schema for the selected logical interface
         Schema.getContent(
@@ -229,6 +231,9 @@
      */
     function onTypeSelected() {
       
+      // First, unsubcribe from any previous MQTT topics
+      manageMqttSubscriptions(false);
+      
       // Reset the relevant view-model variables and the chart
       vm.stateData = [];
 
@@ -245,6 +250,9 @@
      * we need to remove the current state data and reset the chart. 
      */
     function onInstanceSelected() {
+      
+      // First, unsubcribe from any previous MQTT topics
+      manageMqttSubscriptions(false);
       
       // Reset the relevant view-model variables and the chart
       vm.stateData = [];
@@ -405,20 +413,20 @@
        * valid MQTT topic names
        */ 
       if (  vm.mqttClient && vm.mqttClient.isConnected()
-         && DashboardFactory.getDeviceStateNotificationTopic()
-         && DashboardFactory.getDeviceStateErrorTopic()
-         && DashboardFactory.getRuleNotificationTopic()
-         && DashboardFactory.getRuleErrorTopic()
+         && getDeviceStateNotificationTopic()
+         && getDeviceStateErrorTopic()
+         && getRuleNotificationTopic()
+         && getRuleErrorTopic()
          ) {
         // Determine whether we are subscribing or unsubscribing
         var func = vm.mqttClient.subscribe;
         if (!subscribe) {
           func = vm.mqttClient.unsubscribe;
         }
-        func(DashboardFactory.getDeviceStateNotificationTopic());
-        func(DashboardFactory.getDeviceStateErrorTopic());
-        func(DashboardFactory.getRuleNotificationTopic());
-        func(DashboardFactory.getRuleErrorTopic());
+        func(getDeviceStateNotificationTopic());
+        func(getDeviceStateErrorTopic());
+        func(getRuleNotificationTopic());
+        func(getRuleErrorTopic());
       }
     }
 
@@ -481,5 +489,55 @@
         }
       });
     } // onNoStateFoundResponse
+
+    /**
+     * Returns the MQTT topic that device state update notifications are
+     * published to... calculated based on the selected logical interface,
+     * type and instance.
+     */
+    function getDeviceStateNotificationTopic() {
+      var deviceStateTopic = null;
+      if (vm.logicalInterface && vm.type && vm.instance) {
+        deviceStateTopic = 'iot-2/type/' + vm.type.id + '/id/' + vm.instance.id + '/intf/' + vm.logicalInterface.id + '/evt/state';
+      }
+      return deviceStateTopic;
+    }
+
+    /**
+     * Returns the MQTT topic that device state error notifications are
+     * published to... calculated based on the selected logical interface,
+     * type and instance.
+     */
+    function getDeviceStateErrorTopic() {
+      var deviceStateErrorTopic = null;
+      if (vm.logicalInterface && vm.type && vm.instance) {
+        deviceStateErrorTopic = 'iot-2/type/' + vm.type.id + '/id/' + vm.instance.id + '/err/data';
+      }
+      return deviceStateErrorTopic;
+    }
+
+    /**
+     * Returns the MQTT topic that rule trigger notifications are published
+     * to... calculated based on the selected logical interface.
+     */
+    function getRuleNotificationTopic() {
+      var ruleTriggerNotificationTopic = null;
+      if (vm.logicalInterface) {
+        ruleTriggerNotificationTopic = 'iot-2/intf/' + vm.logicalInterface.id + '/rule/+/evt/trigger';
+      }
+      return ruleTriggerNotificationTopic;
+    }
+
+    /**
+     * Returns the MQTT topic that rule error notifications are published
+     * to... calculated based on the selected logical interface.
+     */
+    function getRuleErrorTopic() {
+      var ruleErrorTopic = null;
+      if (vm.logicalInterface) {
+        ruleErrorTopic = 'iot-2/intf/' + vm.logicalInterface.id + '/rule/+/err/data';
+      }
+      return ruleErrorTopic;
+    }
   }
 })();
