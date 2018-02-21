@@ -91,8 +91,8 @@
     }
     
     /**
-     * Called when the user modifies the selected device that they want to view
-     * the state for.
+     * Called when the user modifies the selected device or thing that they
+     * want to view the state for.
      */
     function onSelectedInstanceChanged() {
       if (   DashboardFactory.getSelectedLogicalInterface()
@@ -102,8 +102,8 @@
         ActionToast.hide();
       } else {
         ActionToast.show({
-          message: 'Now you need to select the Device whose state you want to view.',
-          actionMessage: 'Show Device Selector',
+          message: 'Now you need to select the Device or Thing whose state you want to view.',
+          actionMessage: 'Show Device/Thing Selector',
           actionCallback: function(event) {
             $mdSidenav('left').toggle();
           }

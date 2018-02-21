@@ -5,9 +5,9 @@
     .module('demouiApp.nav')
     .controller('NavController', NavController);
 
-  NavController.$inject = ['$scope', '$q', 'Constants', 'DashboardFactory', 'LogicalInterface', 'DraftDeviceType', 'DeviceType', 'ActionToast', 'CredentialsDialog'];
+  NavController.$inject = ['$scope', '$q', 'Constants', 'DashboardFactory', 'LogicalInterface', 'DraftDeviceType', 'DeviceType', 'ThingType', 'ActionToast', 'CredentialsDialog'];
 
-  function NavController($scope, $q, Constants, DashboardFactory, LogicalInterface, DraftDeviceType, DeviceType, ActionToast, CredentialsDialog) {
+  function NavController($scope, $q, Constants, DashboardFactory, LogicalInterface, DraftDeviceType, DeviceType, ThingType, ActionToast, CredentialsDialog) {
     /*jshint validthis: true */
     var vm = this;
 
@@ -37,8 +37,8 @@
       });
 
       /*
-       * Watch the logicalInterface, deviceType and device attributes
-       * because md-select does not appear to support the ng-change attribute
+       * Watch the logicalInterface, type and instance attributes because
+       * md-select does not appear to support the ng-change attribute
        * properly:
        *
        *   https://github.com/angular/material/issues/1576
@@ -88,8 +88,8 @@
 
     /**
      * Called when the user changes the logical interface that is selected. In
-     * response, we need to retrieve the devices that expose the selected
-     * logical interface.
+     * response, we need to retrieve the devices/things that expose the
+     * selected logical interface.
      */
     function onLogicalInterfaceSelected() {
       // Reset the relevant view-model variables
@@ -99,8 +99,8 @@
       vm.instance = null;
 
       /*
-       * Now store the selected logical interface, device type and device in
-       * the DashboardFactory.
+       * Now store the selected logical interface, type and instance in the
+       * DashboardFactory.
        */
       DashboardFactory.setSelectedLogicalInterface(vm.logicalInterface !== 'None' ? vm.logicalInterface : null);
       DashboardFactory.setSelectedType(vm.type);
@@ -108,53 +108,43 @@
 
       /*
        * If a valid active logical interface was selected, we need to retrieve
-       * all of the active Device Types are associated with the logical
-       * interface. Unfortunately, it is not yet possible to filter the device
-       * types collection with a specific logicalInterfaceId... this will
-       * come after GA.
-       * 
-       * For now, we need to retrieve all of the draft Device Types that are
-       * associated with the specified logical interface and then attempt to
-       * retrieve the logical interfaces for those device types to ensure that
-       * the associated logical interface has been activated. 
+       * all of the active Device and Thing Types are associated with the
+       * logical interface.
        */
       if (vm.logicalInterface !== 'None') {
-        /*
-         * Retrieve all of the Device Types that are associated with the
-         * selected logical interface
-         */ 
-        DraftDeviceType.query(
+        DeviceType.query(
           {logicalInterfaceId: vm.logicalInterface.id},
           function(response) {
-            /*
-             * Now retrieve the logical interfaces associated with each of
-             * returned Device Types.  Make all of these calls in parallel.
-             */
-            var devicePromises = response.results.map(function(deviceType){
-              return DeviceType.getLogicalInterfaces({ typeId: deviceType.id }).$promise;
+            // Store the returned device types in the types collection
+            var deviceTypes = response.results;
+            angular.forEach(deviceTypes, function(deviceType) {
+              deviceType.type = Constants.resourceType.DEVICE_TYPE;
+              vm.types.push(deviceType);
             });
+          },
+          function(response) {
+            /*
+             * Check specifically for a 401 Unauthorized or a 403 Forbidden 
+             * response here.  This indicates that the credentials entered by
+             * the user are incorrect/invalid.
+             */
+            if (  response.status === 401
+               || response.status === 403
+               ) {
+              onUnauthorizedOrForbiddenResponse();
+            }
+          }
+        );
 
-            // Wait until all of the requests have completed
-            $q.all(devicePromises).then(
-              function(responses) {
-                /*
-                 * For each response, iterate over the array of active Logical
-                 * Interfaces returned and check if it matches the selected
-                 * Logical Interface.
-                 */
-                angular.forEach(responses, function(deviceTypeLogicalIntfs, index) {
-                  for (var i = 0; i < deviceTypeLogicalIntfs.length; i++) {
-                    if (deviceTypeLogicalIntfs[i].id === vm.logicalInterface.id) {
-                      response.results[index].type = Constants.resourceType.DEVICE_TYPE;
-                      vm.types.push(response.results[index]);
-                      break;
-                    }
-                  }
-                });
-              },
-              function() {
-              }
-            );
+        ThingType.query(
+          {logicalInterfaceId: vm.logicalInterface.id},
+          function(response) {
+            // Store the returned thing types in the types collection
+            var thingTypes = response.results;
+            angular.forEach(thingTypes, function(thingType) {
+              thingType.type = Constants.resourceType.THING_TYPE;
+              vm.types.push(thingType);
+            });
           },
           function(response) {
             /*
@@ -174,7 +164,8 @@
 
     /**
      * Called when the user changes the type that is selected. In response, we
-     * need to retrieve all of the Device instances for the selected type.
+     * need to retrieve all of the Device/Thing instances for the selected
+     * type.
      */
     function onTypeSelected() {
       // First, store the selected type in the DashboardFactory
@@ -183,13 +174,13 @@
       vm.instances = [];
       vm.instance = null;
 
-      // Now store the selected device type and device in the DashboardFactory.
+      // Now store the selected device/thing type and device in the DashboardFactory.
       DashboardFactory.setSelectedType(vm.type !== 'None' ? vm.type : null);
       DashboardFactory.setSelectedInstance(vm.instance);
 
       /*
-       * If a valid type was selected, we need to retrieve all of the Devices
-       * of that type.
+       * If a valid type was selected, we need to retrieve all of the
+       * Devices/Things of that type.
        */
       if (vm.type !== 'None') {
         if (vm.type.type === Constants.resourceType.DEVICE_TYPE) {
@@ -222,6 +213,36 @@
                 }
               }
             );
+        } else if (vm.type.type === Constants.resourceType.THING_TYPE) {	
+          /*	
+           * The selected type is a Thing Type. Retrieve all of the instances	
+           * of the Thing Type.	
+           */	
+          ThingType.getThings(	
+            { typeId: vm.type.id },	
+            function(response) {	
+              // Normalize the ids	
+              var instances = response.results;	
+              angular.forEach(instances, function(instance) {	
+                instance.id = instance.thingId;	
+              });	
+            	
+              // Store the list of instances	
+              vm.instances = instances;	
+            },	
+            function(response) {	
+              /*	
+               * Check specifically for a 401 Unauthorized or a 403 Forbidden 	
+               * response here.  This indicates that the credentials entered	
+               * by the user are incorrect/invalid.	
+               */	
+              if (  response.status === 401	
+                 || response.status === 403	
+                 ) {	
+                onUnauthorizedOrForbiddenResponse();	
+              }	
+            }	
+          );
         }
       } // IF - vm.type !== 'None'
     } // onTypeSelected

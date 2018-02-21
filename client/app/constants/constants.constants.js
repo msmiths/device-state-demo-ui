@@ -28,8 +28,14 @@
     var draftDeviceTypeLogicalInterfacesEndpoint = draftDeviceTypesEndpoint + '/logicalinterfaces';
     var deviceTypeLogicalInterfacesEndpoint = deviceTypesEndpoint + '/logicalinterfaces';
     var deviceStateEndpoint = deviceEndpoint + '/state/:logicalIntfId';
+    var thingTypesEndpoint = baseURL + '/thing/types/:typeId';
+    var thingsEndpoint = thingTypesEndpoint + '/things';	
+    var thingEndpoint = thingsEndpoint + '/:thingId';	
+    var thingTypeLogicalInterfacesEndpoint = thingTypesEndpoint + '/logicalinterfaces';	
+    var thingStateEndpoint = thingEndpoint + '/state/:logicalIntfId';	
     var resourceType = {
-      DEVICE_TYPE: 'DEVICE_TYPE'
+      DEVICE_TYPE: 'DEVICE_TYPE',
+      THING_TYPE: 'THING_TYPE'
     };
     var httpHeaders = {
       authorization: 'Authorization'
@@ -62,6 +68,11 @@
         draftDeviceTypeLogicalInterfacesEndpoint: draftDeviceTypeLogicalInterfacesEndpoint,
         deviceTypeLogicalInterfacesEndpoint: deviceTypeLogicalInterfacesEndpoint,
         deviceStateEndpoint: deviceStateEndpoint,
+        thingTypesEndpoint: thingTypesEndpoint,
+        thingsEndpoint: thingsEndpoint,
+        thingEndpoint: thingEndpoint,
+        thingTypeLogicalInterfacesEndpoint: thingTypeLogicalInterfacesEndpoint,
+        thingStateEndpoint: thingStateEndpoint,
         resourceType: resourceType,
         httpHeaders: httpHeaders,
         apiKeyRegex: apiKeyRegex,

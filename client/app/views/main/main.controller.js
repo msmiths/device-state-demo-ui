@@ -5,9 +5,9 @@
     .module('demouiApp.main')
     .controller('MainController', MainController);
 
-  MainController.$inject = ['$scope', '$http', '$q', '$interval', '$mdSidenav', 'Constants', 'DashboardFactory', 'Schema', 'DeviceType', 'Rule', 'ActionToast', 'ErrorNotificationDialog', 'RuleNotificationDialog', 'CredentialsDialog'];
+  MainController.$inject = ['$scope', '$http', '$q', '$interval', '$mdSidenav', 'Constants', 'DashboardFactory', 'Schema', 'DeviceType', 'ThingType', 'Rule', 'ActionToast', 'ErrorNotificationDialog', 'RuleNotificationDialog', 'CredentialsDialog'];
 
-  function MainController($scope, $http, $q, $interval, $mdSidenav, Constants, DashboardFactory, Schema, DeviceType, Rule, ActionToast, ErrorNotificationDialog, RuleNotificationDialog, CredentialsDialog) {
+  function MainController($scope, $http, $q, $interval, $mdSidenav, Constants, DashboardFactory, Schema, DeviceType, ThingType, Rule, ActionToast, ErrorNotificationDialog, RuleNotificationDialog, CredentialsDialog) {
     /*jshint validthis: true */
     var vm = this;
 
@@ -95,15 +95,15 @@
             // Only attempt to subscribe if we have a valid topic
             manageMqttSubscriptions(true);
 
-            // vm.intervalPromise = $interval(function() {
-            //   retrieveState();
-            // }, vm.chartRefreshInterval);
+            vm.intervalPromise = $interval(function() {
+              retrieveState();
+            }, vm.chartRefreshInterval);
           } else {
             // Only attempt to unsubscribe if we have a valid topic
             manageMqttSubscriptions(false);
 
-            // $interval.cancel(vm.intervalPromise);
-            // vm.intervalPromise = null;
+            $interval.cancel(vm.intervalPromise);
+            vm.intervalPromise = null;
           }
         }
       );
@@ -172,7 +172,7 @@
             Object.keys(schema.properties).forEach(function (key) {
               var property = schema.properties[key];
               property.name = key;
-              if (property.type && property.type === 'number') {
+              if (property.type && (property.type === 'number' || property.type === 'integer')) {
                 vm.numericSchemaProperties.push(property);
               } else {
                 vm.nonNumericSchemaProperties.push(property);
@@ -282,8 +282,8 @@
         if (DashboardFactory.getSelectedType().type === vm.constants.resourceType.DEVICE_TYPE) {
           // The instance selected is a device... retrieve its state
           retrieveDeviceState();
-        } else {
-          // Do nothing here... placeholder for thing state
+        } else if (DashboardFactory.getSelectedType().type === vm.constants.resourceType.THING_TYPE) {
+          retrieveThingState();
         }
       }
     } // retrieveState
@@ -355,10 +355,11 @@
        * We only display one minutes worth of data points.  Strip off the first
        * element of the array if it is over a certain size.
        */
-      if (vm.stateData.length > 65) {
-        vm.stateData.shift();
-      }
+      // if (vm.stateData.length > 65) {
+      //   vm.stateData.shift();
+      // }
     }
+
     /**
      * Retrieve the state of the currently selected device.
      */
@@ -370,26 +371,40 @@
           logicalIntfId: DashboardFactory.getSelectedLogicalInterface().id
         },
         function(response) {
+
           /*
            * Normalise the response until the latest drivers have been
            * deployed into production.
            */
-          var data = {};
-          var now = Date.now();
-          if (!response.updated && !response.state) {
-            /*
-             * The data returned is in the old format... inject our own
-             * updated timestamp and store the state in a state property.
-             */
-            data.updated = now;
-            data.state = response; 
-          } else {
-            var updatedMillis = new Date(response.updated).getTime();
-            response.updated = updatedMillis;
-            data = response;
-          }
-          data.timestamp = now;
-          vm.stateData.push(data);
+          // Convert the ISO8601 date properties to millis 
+          // var data = {};
+          response.updated = new Date(response.updated).getTime();
+          response.timestamp = new Date(response.timestamp).getTime();
+          // var now = Date.now();
+          // if (!response.updated && !response.state) {
+          //   /*
+          //    * The data returned is in the old format... inject our own
+          //    * updated timestamp and store the state in a state property.
+          //    */
+          //   data.updated = now;
+          //   data.state = response; 
+          // } else {
+          //   var updatedMillis = new Date(response.updated).getTime();
+          //   response.updated = updatedMillis;
+          //   data = response;
+          // }
+          // data.timestamp = now;
+          // vm.stateData.push(data);
+          vm.stateData.push(response);
+
+         /*
+          * We only display one minutes worth of data points.  Strip off the first
+          * element of the array if it is over a certain size.
+          */
+          // if (vm.stateData.length > 65) {
+          //   vm.stateData.shift();
+          // }
+    
         },
         function(response) {
           if (  response.status === 401
@@ -403,6 +418,43 @@
       );
     } // retrieveDeviceState
 
+    /**
+     * Retrieve the state of the currently selected thing.
+     */
+    function retrieveThingState() {
+      ThingType.getThingState(
+        {
+          typeId: DashboardFactory.getSelectedType().id,
+          thingId: DashboardFactory.getSelectedInstance().id,
+          logicalIntfId: DashboardFactory.getSelectedLogicalInterface().id
+        },
+        function(response) {
+
+          // Convert the ISO8601 date properties to millis 
+          response.updated = new Date(response.updated).getTime();
+          response.timestamp = new Date(response.timestamp).getTime();
+          vm.stateData.push(response);
+
+          /*
+           * We only display one minutes worth of data points.  Strip off the first
+           * element of the array if it is over a certain size.
+           */
+          // if (vm.stateData.length > 65) {
+          //   vm.stateData.shift();
+          // }
+        },
+        function(response) {
+          if (  response.status === 401
+             || response.status === 403
+             ) {
+             onUnauthorizedOrForbiddenResponse();
+           } else if (response.status === 404) {
+             onNoStateFoundResponse();
+           }
+        }
+      );
+    } // retrieveThingState
+
     /*
      * The manageMqttSubscriptions function is used to manage MQTT
      * subscriptions in a single place
@@ -415,6 +467,8 @@
       if (  vm.mqttClient && vm.mqttClient.isConnected()
          && getDeviceStateNotificationTopic()
          && getDeviceStateErrorTopic()
+         && getThingStateNotificationTopic()
+         && getThingStateErrorTopic()
          && getRuleNotificationTopic()
          && getRuleErrorTopic()
          ) {
@@ -423,8 +477,10 @@
         if (!subscribe) {
           func = vm.mqttClient.unsubscribe;
         }
-        func(getDeviceStateNotificationTopic());
+        // func(getDeviceStateNotificationTopic());
         func(getDeviceStateErrorTopic());
+        // func(getThingStateNotificationTopic());
+        func(getThingStateErrorTopic());
         func(getRuleNotificationTopic());
         func(getRuleErrorTopic());
       }
@@ -514,6 +570,32 @@
         deviceStateErrorTopic = 'iot-2/type/' + vm.type.id + '/id/' + vm.instance.id + '/err/data';
       }
       return deviceStateErrorTopic;
+    }
+
+    /**
+     * Returns the MQTT topic that thing state update notifications are
+     * published to... calculated based on the selected logical interface,
+     * type and instance.
+     */
+    function getThingStateNotificationTopic() {
+      var thingStateTopic = null;
+      if (vm.logicalInterface && vm.type && vm.instance) {
+        thingStateTopic = 'iot-2/thing/type/' + vm.type.id + '/id/' + vm.instance.id + '/intf/' + vm.logicalInterface.id + '/evt/state';
+      }
+      return thingStateTopic;
+    }
+
+    /**
+     * Returns the MQTT topic that thing state error notifications are
+     * published to... calculated based on the selected logical interface,
+     * type and instance.
+     */
+    function getThingStateErrorTopic() {
+      var thingStateErrorTopic = null;
+      if (vm.logicalInterface && vm.type && vm.instance) {
+        thingStateErrorTopic = 'iot-2/thing/type/' + vm.type.id + '/id/' + vm.instance.id + '/err/data';
+      }
+      return thingStateErrorTopic;
     }
 
     /**

@@ -30,7 +30,7 @@
             scope.properties.forEach( function(property, index) {
                 var lineGenerator = d3.line()
                   .curve(d3.curveMonotoneX) // Smooth the line
-                  .x(function(d) { return xRange(d.updated); })
+                  .x(function(d) { return xRange(d.timestamp); })
                   .y(function(d) { return yRange(d.state[property.name]);});
                 lineGenerators[property.name] = lineGenerator;
                 scope.createLine(property, index);
@@ -166,13 +166,16 @@
            */
           scope.getDomainEndTime = function() {
             var endTime = sessionStartTime;
-            if (scope.data && scope.data.length > 0) {
-              var actualRefreshInterval = scope.refreshInterval;
-              if (scope.data.length > 1) {
-                actualRefreshInterval = scope.data[scope.data.length - 1].updated -
-                                         scope.data[scope.data.length - 2].updated;
-              }
-              endTime = scope.data[scope.data.length - 1].updated - (2 * actualRefreshInterval);
+            if (scope.data && scope.data.length > 1) {
+              // var actualRefreshInterval = scope.refreshInterval;
+              // if (scope.data.length > 1) {
+              //   actualRefreshInterval = scope.data[scope.data.length - 1].timestamp -
+              //                            scope.data[scope.data.length - 2].timestamp;
+              // }
+              // endTime = scope.data[scope.data.length - 1].timestamp - (2 * actualRefreshInterval);
+
+              // endTime = scope.data[scope.data.length - 1].timestamp - (2 * scope.refreshInterval);
+              endTime = scope.data[scope.data.length - 1].timestamp;
             }
             return endTime;
           }; // getDomainEndTime
@@ -202,11 +205,11 @@
                   .append('circle')
                     .attr('r', 3)
                     .attr('id', function(d) {
-                      return property.name + '_circle_' + d.updated;
+                      return property.name + '_circle_' + d.timestamp;
                     })
                     .attr('clip-path', 'url(#' + attrs.id + '_clip)')
                     .attr('cx', function(d) {
-                      return xRange(d.updated);
+                      return xRange(d.timestamp);
                     })
                     .attr('cy', function(d) {
                       return yRange(d.state[property.name]);
@@ -263,12 +266,18 @@
               scope.renderDataPoints();
             }
 
+            // Create the transition
+            var t = chart.transition()
+              .duration(750)
+              .ease(d3.easeLinear);
+
             // Now update each of the lines on the chart.
             for (var index = 0; index < scope.properties.length; index++) {
               var property = scope.properties[index];
 
               // Select the line for the current property and update it
-              var line = chart.select('#' + property.name + '_line');
+              // var line = chart.select('#' + property.name + '_line');
+              var line = t.select('#' + property.name + '_line');
               line.attr('d', lineGenerators[property.name](scope.data))
                   .attr('transform', null);
 
@@ -277,10 +286,11 @@
                * points on the current line and, if there are, update each
                * of them.
                */
-              chart.selectAll('circle[id^=\'' + property.name + '_circle\']')
+              // chart.selectAll('circle[id^=\'' + property.name + '_circle\']')
+              t.selectAll('circle[id^=\'' + property.name + '_circle\']')
                 .attr('cx', function(d) {
                   // return xRange(d.timestamp);
-                  return xRange(d.updated);
+                  return xRange(d.timestamp);
                 })
                 .attr('cy', function(d) {
                   return yRange(d.state[property.name]);
@@ -302,23 +312,24 @@
             var startTime = endTime - sessionWindow;
             xRange.domain([startTime, endTime]);
 
-            // Now work out how for to slide the elements to the left
+            // Now work out how far to slide the elements to the left
             var leftShift = 0;
             if (scope.data && scope.data.length > 1) {
-              leftShift = xRange(scope.data[scope.data.length - 1].updated) -
-                          xRange(scope.data[scope.data.length - 2].updated);
+              leftShift = xRange(scope.data[scope.data.length - 1].timestamp) -
+                          xRange(scope.data[scope.data.length - 2].timestamp);
+              // leftShift = xRange(endTime) - xRange(endTime - scope.refreshInterval);
             }
 
-            // Create the transition
-            var t = chart.transition()
-              .duration(750)
-              .ease(d3.easeLinear);
+            // // Create the transition
+            // var t = chart.transition()
+            //   .duration(750)
+            //   .ease(d3.easeLinear);
 
             // Now transform the lines, circles and x axis
-            t.selectAll('.line')
-              .attr('transform', 'translate(-' + leftShift + ', 0)');
-            t.selectAll('circle')
-              .attr('transform', 'translate(-' + leftShift + ', 0)');
+            // t.selectAll('.line')
+            //   .attr('transform', 'translate(-' + leftShift + ')');
+            // t.selectAll('circle')
+            //   .attr('transform', 'translate(-' + leftShift + ')');
             t.select('.x.DeviceStateChartAxis')
               .call(xAxis)
               .selectAll('text')

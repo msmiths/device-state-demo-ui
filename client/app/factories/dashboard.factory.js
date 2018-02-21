@@ -85,28 +85,28 @@
     }
 
     /**
-     * Returns the selected device type
+     * Returns the selected device or thing type
      */
     function getSelectedType() {
       return type;
     }
 
     /**
-     * Sets the selected device type
+     * Sets the selected device or thing type
      */
     function setSelectedType(newType) {
       type = newType;
     }
 
     /**
-     * Returns the selected device instance
+     * Returns the selected device or thing instance
      */
     function getSelectedInstance() {
       return instance;
     }
 
     /**
-     * Sets the selected device instance
+     * Sets the selected device or thing instance
      */
     function setSelectedInstance(newInstance) {
       instance = newInstance;
@@ -132,7 +132,8 @@
      */
     function getMQTTEndpoint() {
       var orgId = apiKey.substr(2, 6);
-      return 'wss://' + orgId + '.messaging.internetofthings.ibmcloud.com/mqtt';
+      return 'wss://' + orgId + '.messaging.ams03-3.test.internetofthings.ibmcloud.com/mqtt';
+      // return 'wss://' + orgId + '.messaging.internetofthings.ibmcloud.com/mqtt';
     }
 
     /**
