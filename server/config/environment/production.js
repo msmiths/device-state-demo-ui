@@ -14,5 +14,5 @@ module.exports = {
             8080,
             
   WIOT_DOMAIN: process.env.WIOT_DOMAIN ||
-              "internetofthings.ibmcloud.com"
+              "ams03-3.test.internetofthings.ibmcloud.com"
 };
