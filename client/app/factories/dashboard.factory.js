@@ -132,8 +132,7 @@
      */
     function getMQTTEndpoint() {
       var orgId = apiKey.substr(2, 6);
-      return 'wss://' + orgId + '.messaging.ams03-3.test.internetofthings.ibmcloud.com/mqtt';
-      // return 'wss://' + orgId + '.messaging.internetofthings.ibmcloud.com/mqtt';
+      return 'wss://' + orgId + '.messaging.internetofthings.ibmcloud.com/mqtt';
     }
 
     /**
