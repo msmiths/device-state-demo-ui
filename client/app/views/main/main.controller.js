@@ -490,17 +490,27 @@
      * Called when an MQTT rule trigger notification event is received. 
      */
     function onRuleTriggerNotification(ruleId, payload) {
-      // Retrieve the metadta for the rule that has been triggered
-      var rule = vm.rules[ruleId];
 
-      ActionToast.show({
-        message: 'The \'' + rule.name +'\' rule has been triggered',
-        actionMessage: 'Show Details',
-        actionCallback: function(event) {
-          RuleNotificationDialog.show(event, rule, payload);
-        },
-        hideDelay: Constants.misc.defaultToastHideDelay
-      });
+      // Make sure that subject of the rule matches the select device/thing
+      if (vm.type && vm.instance) {
+        if (  vm.type.id == payload.typeId
+           && vm.instance.id === payload.instanceId
+          ) {
+            // Retrieve the metadta for the rule that has been triggered
+            var rule = vm.rules[ruleId];
+
+            ActionToast.show({
+              message: 'The \'' + rule.name +'\' rule has been triggered',
+              actionMessage: 'Show Details',
+              actionCallback: function(event) {
+                RuleNotificationDialog.show(event, rule, payload);
+              },
+              hideDelay: Constants.misc.defaultToastHideDelay
+            });
+        } else {
+          console.log('Rule trigger event is not for selected device/thing - ignoring');
+        }
+      }
     } // onRuleTriggerNotification 
 
     /**
