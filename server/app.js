@@ -38,8 +38,11 @@ var app = express();
 app.use('/api/v0002', proxy(process.env.WIOT_ORG_ID + '.' + process.env.WIOT_DOMAIN, {
   https: true,
   forwardPath: function(req, res) {
+    // Remove the origin header to avoid CORS issues
+    delete req.headers['origin'];
     return '/api/v0002' + url.parse(req.url).path;
-  }}));
+  }
+}));
 
 /*
  * If the application is running in production in Bluemix then we get TLS for
@@ -55,7 +58,8 @@ if (process.env.NODE_ENV === 'production') {
    * TLS for the server.
    */
   var options = {
-    secureOptions: constants.SSL_OP_NO_SSLv3 | constants.SSL_OP_NO_SSLv2,
+    // secureOptions: constants.SSL_OP_NO_SSLv3 | constants.SSL_OP_NO_SSLv2,
+    secureOptions: constants.SSL_OP_NO_SSLv3,
     key: config.SERVER_KEY,
     cert: config.SERVER_CERT
   };

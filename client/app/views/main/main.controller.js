@@ -5,9 +5,9 @@
     .module('demouiApp.main')
     .controller('MainController', MainController);
 
-  MainController.$inject = ['$scope', '$http', '$q', '$interval', '$mdSidenav', 'Constants', 'DashboardFactory', 'Schema', 'DeviceType', 'ThingType', 'Rule', 'ActionToast', 'ErrorNotificationDialog', 'RuleNotificationDialog', 'CredentialsDialog'];
+  MainController.$inject = ['$scope', '$http', '$q', '$interval', '$mdSidenav', 'Constants', 'DashboardFactory', 'Schema', 'DeviceType', 'ThingType', 'DraftRule', 'Rule', 'Action', 'Trigger', 'ActionToast', 'ErrorDialog', 'ErrorNotificationDialog', 'RuleNotificationDialog', 'CredentialsDialog', 'RuleDialog', 'ActionDialog', 'TriggerDialog', 'DraftLogicalInterface', 'ConfirmationDialog'];
 
-  function MainController($scope, $http, $q, $interval, $mdSidenav, Constants, DashboardFactory, Schema, DeviceType, ThingType, Rule, ActionToast, ErrorNotificationDialog, RuleNotificationDialog, CredentialsDialog) {
+  function MainController($scope, $http, $q, $interval, $mdSidenav, Constants, DashboardFactory, Schema, DeviceType, ThingType, DraftRule, Rule, Action, Trigger, ActionToast, ErrorDialog, ErrorNotificationDialog, RuleNotificationDialog, CredentialsDialog, RuleDialog, ActionDialog, TriggerDialog, DraftLogicalInterface, ConfirmationDialog) {
     /*jshint validthis: true */
     var vm = this;
 
@@ -18,7 +18,10 @@
     vm.colorScale = d3.schemeCategory20;
     vm.logicalInterface = null;
     vm.logicalInterfaceSchema = null;
-    vm.rules = {};
+    vm.rules = [];
+    vm.actions = [];
+    vm.triggers = {};
+    vm.selectedAction = -1;
     vm.numericSchemaProperties = [];
     vm.nonNumericSchemaProperties = [];
     vm.type = null;
@@ -26,6 +29,20 @@
     vm.stateData = [];
     vm.intervalPromise = null;
     vm.mqttClient = null;
+    vm.rulesEnabled = false;
+    vm.actionsEnabled = false;
+    vm.createRule = createRule;
+    vm.editRule = editRule;
+    vm.deleteRule = deleteRule;
+    vm.createAction = createAction;
+    vm.editAction = editAction;
+    vm.deleteAction = deleteAction;
+    vm.createTrigger = createTrigger;
+    vm.editTrigger = editTrigger;
+    vm.deleteTrigger = deleteTrigger;
+    vm.toggleTriggers = toggleTriggers;
+    vm.retrieveTriggers = retrieveTriggers;
+    vm.showSpinner = false;
 
     /**
      * Activates the view... performs one off initialization.
@@ -82,6 +99,34 @@
 
       /*
        * Set a watch on a function that returns the value of calling the
+       * getRulesEnabled() function on the DashboardFactory.  This enables
+       * us to toggle the display of the Rules table in the content area.
+       */
+      $scope.$watch(
+        function() {
+          return DashboardFactory.getRulesEnabled();
+        },
+        function(newValue, oldValue) {
+          vm.rulesEnabled = newValue;
+        }
+      );
+
+      /*
+       * Set a watch on a function that returns the value of calling the
+       * getActionsEnabled() function on the DashboardFactory.  This enables
+       * us to toggle the display of the Rules table in the content area.
+       */
+      $scope.$watch(
+        function() {
+          return DashboardFactory.getActionsEnabled();
+        },
+        function(newValue, oldValue) {
+          vm.actionsEnabled = newValue;
+        }
+      );
+
+      /*
+       * Set a watch on a function that returns the value of calling the
        * getUpdatesEnabled() function on the DashboardFactory.  This enables
        * us to toggle updates in the toolbar and pick up the change here in
        * order to control whether poll for device state.
@@ -95,15 +140,15 @@
             // Only attempt to subscribe if we have a valid topic
             manageMqttSubscriptions(true);
 
-            vm.intervalPromise = $interval(function() {
-              retrieveState();
-            }, vm.chartRefreshInterval);
+            // vm.intervalPromise = $interval(function() {
+            //   retrieveState();
+            // }, vm.chartRefreshInterval);
           } else {
             // Only attempt to unsubscribe if we have a valid topic
             manageMqttSubscriptions(false);
 
-            $interval.cancel(vm.intervalPromise);
-            vm.intervalPromise = null;
+            // $interval.cancel(vm.intervalPromise);
+            // vm.intervalPromise = null;
           }
         }
       );
@@ -133,6 +178,33 @@
         },
         onInstanceSelected
       );
+
+      /*
+       * Set a watch on the actions array so that we can retrieve the triggers
+       * for each action when it changes.
+       */
+      $scope.$watch(
+        "vm.actions",
+        function() {
+          angular.forEach(vm.actions, function(action, index) {
+            vm.retrieveTriggers(action);
+          });
+        }
+      );
+
+      /*
+       * Set a watch on a function that returns the value of calling the
+       * getShowSpinner() function on the DashboardFactory. This enables us to
+       * change the flag in dalogs that perform long running tasks.
+       */
+      $scope.$watch(
+        function() {
+          return DashboardFactory.getShowSpinner();
+        },
+        function(newValue, oldValue) {
+          vm.showSpinner = newValue;
+        }
+      );
     } // activate
 
     /**
@@ -152,7 +224,10 @@
       vm.type = DashboardFactory.getSelectedType();
       vm.instance = DashboardFactory.getSelectedInstance();
       vm.stateData = [];
-      vm.rules = {};
+      vm.rules = [];
+      vm.actions = [];
+      vm.triggers = {};
+      vm.selectedAction = -1;
       
       // Reset the chart
       vm.chartController.reset();
@@ -196,32 +271,10 @@
         );
 
         // Retrieve the rules for the selected logical interface
-        Rule.query(
-          { 
-            logicalIntfId: vm.logicalInterface.id
-          },
-          function(rules) {
-            /*
-             * Convert the response into an associative array so that we can
-             * easily retrieve rules by their ids later.
-             */
-            rules.map(function(rule){
-              vm.rules[rule.id] = rule;
-            });
-          },
-          function(response) {
-            /*
-              * Check specifically for a 401 Unauthorized or a 403 Forbidden 
-              * response here.  This indicates that the credentials entered by
-              * the user are incorrect/invalid.  This should not happen since the
-              * user has just selected an logical interface, but we should
-              * handle it anyway.
-              */
-            if (  response.status === 401 || response.status === 403) {
-              onUnauthorizedOrForbiddenResponse();
-            }
-          }
-        );
+        retrieveRules();
+
+        // Retrieve the actions for the selected logical interface
+        retrieveActions();
       }
     }
 
@@ -243,6 +296,11 @@
 
       // Now reset the chart
       vm.chartController.reset();
+
+      // Check all of the checkboxes on the properties table
+      document.querySelectorAll('input').forEach(function(checkbox) {
+        checkbox.checked = true;
+      });
     }
 
     /**
@@ -263,9 +321,127 @@
       // Now reset the chart
       vm.chartController.reset();
 
+      // Check all of the checkboxes on the properties table
+      document.querySelectorAll('input').forEach(function(checkbox) {
+        checkbox.checked = true;
+      });
+
       // Only attempt to subscribe if we have a valid topic
       manageMqttSubscriptions(true);
     }
+
+    /**
+     * Called when the user clicks on an action in the Actions table.
+     */
+    function onActionSelected(event, action, index) {
+      vm.selectedAction = index;
+    }
+
+    /**
+     * Called when the user clicks on an action in the Actions table.
+     */
+    function toggleTriggers(action, index) {
+      if (vm.selectedAction === index) {
+        vm.selectedAction = -1;
+      } else {
+        vm.selectedAction = index;
+      }
+    }
+
+    /**
+     * Retrieve the list of rules that have defined on the selected logical
+     * interface.
+     */
+    function retrieveRules() {
+      // Make sure that a logical interface is selected
+      if (vm.logicalInterface) {
+        // Retrieve the rules for the selected logical interface
+        Rule.query(
+          { 
+            logicalIntfId: vm.logicalInterface.id
+          },
+          function(rules) {
+            vm.rules = rules;
+          },
+          function(response) {
+            /*
+              * Check specifically for a 401 Unauthorized or a 403 Forbidden 
+              * response here.  This indicates that the credentials entered by
+              * the user are incorrect/invalid.  This should not happen since
+              * the user has just selected an logical interface, but we should
+              * handle it anyway.
+              */
+            if (response.status === 401 || response.status === 403) {
+              onUnauthorizedOrForbiddenResponse();
+            } else {
+              ErrorDialog.show(event, response);
+            }
+          }
+        );
+      }
+    } // retrieveRules
+
+    /**
+     * Retrieve the list of actions that could be triggered if a rule defined
+     * on the selected logical interface fires.
+     */
+    function retrieveActions() {
+      // Make sure that a logical interface is selected
+      if (vm.logicalInterface) {
+        // Retrieve the actions for the selected logical interface
+        Action.query(
+          function(actions) {
+            vm.actions = actions.results;
+          },
+          function(response) {
+            /*
+              * Check specifically for a 401 Unauthorized or a 403 Forbidden 
+              * response here.  This indicates that the credentials entered by
+              * the user are incorrect/invalid.  This should not happen since
+              * the user has just selected an logical interface, but we should
+              * handle it anyway.
+              */
+            if (response.status === 401 || response.status === 403) {
+              onUnauthorizedOrForbiddenResponse();
+            } else {
+              ErrorDialog.show(event, response);
+            }
+          }
+        );
+      }
+    } // retrieveActions
+
+    /**
+     * Retrieve the list of triggers for the specified action
+     */
+    function retrieveTriggers(action) {
+      // Make sure that the action is valid
+      if (action) {
+        Trigger.query(
+          {
+            actionId: action.id
+          },
+          function(triggers) {
+            // vm.triggers = triggers.results;
+            vm.triggers[action.id] = triggers.results;
+          },
+          function(response) {
+            /*
+              * Check specifically for a 401 Unauthorized or a 403 Forbidden 
+              * response here.  This indicates that the credentials entered by
+              * the user are incorrect/invalid.  This should not happen since
+              * the user has just selected an logical interface, but we should
+              * handle it anyway.
+              */
+            if (response.status === 401 || response.status === 403) {
+              onUnauthorizedOrForbiddenResponse();
+            } else {
+              ErrorDialog.show(event, response);
+            }
+          }
+        );
+      }
+    } // retrieveTriggers
 
     /**
      * Retrieve the state of the currently selected instance.
@@ -298,8 +474,8 @@
       var destinationName = message.destinationName;
       var payload = angular.fromJson(message.payloadString);
 
-      console.log('Destination Name: ' + destinationName);
-      console.log('Payload: ', payload);
+      // console.log('Destination Name: ' + destinationName);
+      // console.log('Payload: ', payload);
 
       /*
        * Determine the type of the notification and take the appropriate
@@ -329,7 +505,13 @@
             type = payload.type;
             typeId = payload.typeId;
             instanceId = payload.instanceId;
-            rule = vm.rules[payload.ruleId];
+            for (var index = 0; index < vm.rules.length; index++) {
+              if (vm.rules[index].ruleId === payload.ruleId) {
+                rule = vm.rules[index];
+                break;
+              }
+            }
+            // rule = vm.rules[payload.ruleId];
           } else {
             // This is a more general runtime error
             var type = Constants.misc.device;
@@ -372,29 +554,11 @@
         },
         function(response) {
 
-          /*
-           * Normalise the response until the latest drivers have been
-           * deployed into production.
-           */
           // Convert the ISO8601 date properties to millis 
-          // var data = {};
           response.updated = new Date(response.updated).getTime();
           response.timestamp = new Date(response.timestamp).getTime();
-          // var now = Date.now();
-          // if (!response.updated && !response.state) {
-          //   /*
-          //    * The data returned is in the old format... inject our own
-          //    * updated timestamp and store the state in a state property.
-          //    */
-          //   data.updated = now;
-          //   data.state = response; 
-          // } else {
-          //   var updatedMillis = new Date(response.updated).getTime();
-          //   response.updated = updatedMillis;
-          //   data = response;
-          // }
-          // data.timestamp = now;
-          // vm.stateData.push(data);
+
+          // Store the state data
           vm.stateData.push(response);
 
          /*
@@ -477,9 +641,9 @@
         if (!subscribe) {
           func = vm.mqttClient.unsubscribe;
         }
-        // func(getDeviceStateNotificationTopic());
+        func(getDeviceStateNotificationTopic());
         func(getDeviceStateErrorTopic());
-        // func(getThingStateNotificationTopic());
+        func(getThingStateNotificationTopic());
         func(getThingStateErrorTopic());
         func(getRuleNotificationTopic());
         func(getRuleErrorTopic());
@@ -497,7 +661,14 @@
            && vm.instance.id === payload.instanceId
           ) {
             // Retrieve the metadta for the rule that has been triggered
-            var rule = vm.rules[ruleId];
+            var rule = null;
+            for (var index = 0; index < vm.rules.length; index++) {
+              if (vm.rules[index].id === ruleId) {
+                rule = vm.rules[index];
+                break;
+              }
+            }
+            // var rule = vm.rules[ruleId];
 
             ActionToast.show({
               message: 'The \'' + rule.name +'\' rule has been triggered',
@@ -631,5 +802,237 @@
       }
       return ruleErrorTopic;
     }
+
+    /*
+     * The createRule function is called when the user clicks the create rule
+     * button.
+     */
+    function createRule(event) {
+      RuleDialog.show(event, null).then(function(response) {
+        // Update the rules if required
+        if (typeof response === 'boolean') {
+          if (response) {
+            retrieveRules();
+          }
+        } else {
+          // We are only expecting HTTP responses here
+          ErrorDialog.show(event, response);
+        }
+      });
+    } // createRule
+
+    /*
+     * The editRule function is called when the user clicks the edit rule
+     * button.
+     */
+    function editRule(rule) {
+      RuleDialog.show(event, rule).then(function(response) {
+        // Update the rules if required
+        if (typeof response === 'boolean') {
+          if (response) {
+            retrieveRules();
+          }
+        } else {
+          // We are only expecting HTTP responses here
+          ErrorDialog.show(event, response);
+        }
+      });
+    } // editRule
+
+    /*
+     * The deleteRule function is called when the user clicks the trash icon
+     * on the row for a rule
+     */
+    function deleteRule(rule) {
+      var title = 'Delete Rule';
+      var message = 'Are you sure you want to delete the rule \'' + rule.name + '\'';
+      ConfirmationDialog.show(event, title, message).then(function(response) {
+        // We are only expecting a boolean repsonse
+        if (response) {
+          // The user has confirmed that they want to delete the rule
+          DraftRule.delete(
+            { 
+              logicalIntfId: vm.logicalInterface.id,
+              ruleId: rule.id
+            },
+            function(response) {
+              var op = {};
+              op.operation = 'activate-configuration';
+              DraftLogicalInterface.performOperation(
+                { 
+                  logicalIntfId: vm.logicalInterface.id
+                },
+                op,
+                function(response) {
+                  retrieveRules();
+                }
+              );
+            },
+            function(response) {
+              /*
+                * Check specifically for a 401 Unauthorized or a 403 Forbidden 
+                * response here.  This indicates that the credentials entered by
+                * the user are incorrect/invalid.  This should not happen since the
+                * user has just selected an logical interface, but we should
+                * handle it anyway.
+                */
+              if (response.status === 401 || response.status === 403) {
+                onUnauthorizedOrForbiddenResponse();
+              } else {
+                ErrorDialog.show(event, response);
+              }
+            }
+          );
+        }
+      });
+    } // deleteRule
+
+    /*
+     * The createAction function is called when the user clicks the create action
+     * button.
+     */
+    function createAction(event) {
+      ActionDialog.show(event, null).then(function(response) {
+        // Update the actions if required
+        if (typeof response === 'boolean') {
+          if (response) {
+            retrieveActions();
+          }
+        } else {
+          // We are only expecting HTTP responses here
+          ErrorDialog.show(event, response);
+        }
+      });
+    } // createAction
+
+    /*
+     * The editAction function is called when the user clicks the edit action
+     * button.
+     */
+    function editAction(action) {
+      ActionDialog.show(event, action).then(function(response) {
+        // Update the actions if required
+        if (typeof response === 'boolean') {
+          if (response) {
+            retrieveActions();
+          }
+        } else {
+          // We are only expecting HTTP responses here
+          ErrorDialog.show(event, response);
+        }
+      });
+    } // editAction
+
+    /*
+     * The deleteAction function is called when the user clicks the trash icon
+     * on the row for an action
+     */
+    function deleteAction(action) {
+      var title = 'Delete Action';
+      var message = 'Are you sure you want to delete the action \'' + action.name + '\'';
+      ConfirmationDialog.show(event, title, message).then(function(response) {
+        // We are only expecting a boolean repsonse
+        if (response) {
+          // The user has confirmed that they want to delete the action
+          Action.delete(
+            { 
+              actionId: action.id
+            },
+            function(response) {
+              retrieveActions();
+            },
+            function(response) {
+              /*
+                * Check specifically for a 401 Unauthorized or a 403 Forbidden 
+                * response here.  This indicates that the credentials entered by
+                * the user are incorrect/invalid.  This should not happen since the
+                * user has just selected an logical interface, but we should
+                * handle it anyway.
+                */
+              if (response.status === 401 || response.status === 403) {
+                onUnauthorizedOrForbiddenResponse();
+              } else {
+                ErrorDialog.show(event, response);
+              }
+            }
+          );
+        }
+      });
+    } // deleteAction
+
+    /*
+     * The createTrigger function is called when the user clicks the create trigger
+     * button.
+     */
+    function createTrigger(event, action) {
+      TriggerDialog.show(event, action, null, vm.logicalInterface, vm.rules).then(function(response) {
+        // Update the triggers if required
+        if (typeof response === 'boolean') {
+          if (response) {
+            retrieveTriggers(action);
+          }
+        } else {
+          // We are only expecting HTTP responses here
+          ErrorDialog.show(event, response);
+        }
+      });
+    } // createAction
+
+    /*
+     * The editTrigger function is called when the user clicks the edit trigger
+     * button.
+     */
+    function editTrigger(event, action, trigger) {
+      TriggerDialog.show(event, action, trigger, vm.logicalInterface, vm.rules).then(function(response) {
+        // Update the triggers if required
+        if (typeof response === 'boolean') {
+          if (response) {
+            retrieveTriggers(action);
+          }
+        } else {
+          // We are only expecting HTTP responses here
+          ErrorDialog.show(event, response);
+        }
+      });
+    } // editAction
+
+    /*
+     * The deleteAction function is called when the user clicks the trash icon
+     * on the row for an action
+     */
+    function deleteTrigger(event, action, trigger) {
+      var title = 'Delete Trigger';
+      var message = 'Are you sure you want to delete the trigger \'' + trigger.name + '\'';
+      ConfirmationDialog.show(event, title, message).then(function(response) {
+        // We are only expecting a boolean repsonse
+        if (response) {
+          // The user has confirmed that they want to delete the trigger
+          Trigger.delete(
+            { 
+              actionId: action.id,
+              triggerId: trigger.id
+            },
+            function(response) {
+              retrieveTriggers(action);
+            },
+            function(response) {
+              /*
+                * Check specifically for a 401 Unauthorized or a 403 Forbidden 
+                * response here.  This indicates that the credentials entered by
+                * the user are incorrect/invalid.  This should not happen since the
+                * user has just selected an logical interface, but we should
+                * handle it anyway.
+                */
+              if (response.status === 401 || response.status === 403) {
+                onUnauthorizedOrForbiddenResponse();
+              } else {
+                ErrorDialog.show(event, response);
+              }
+            }
+          );
+        }
+      });
+    } // deleteTrigger
+
   }
 })();

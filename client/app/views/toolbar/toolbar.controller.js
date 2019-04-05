@@ -42,6 +42,20 @@
     };
 
     /**
+     * Toggles whether to display rules
+     */
+    vm.toggleRules = function(event) {
+      DashboardFactory.setRulesEnabled(!DashboardFactory.getRulesEnabled());
+    };
+
+    /**
+     * Toggles whether to display actions
+     */
+    vm.toggleActions = function(event) {
+      DashboardFactory.setActionsEnabled(!DashboardFactory.getActionsEnabled());
+    };
+
+    /**
      * Toggles whether to poll for state
      */
     vm.toggleUpdates = function(event) {

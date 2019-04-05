@@ -16,11 +16,12 @@
     var apiKey = null;
     var authenticationToken = null;
     var logicalInterface = null;
-    var deviceType = null;
-    var device = null;
+    var rulesEnabled = false;
+    var actionsEnabled = false;
     var updatesEnabled = true;
     var type = null;
     var instance = null;
+    var showSpinner = false;
     
     var factory = {
       setApiKey: setApiKey,
@@ -33,8 +34,14 @@
       setSelectedType: setSelectedType,
       getSelectedInstance: getSelectedInstance,
       setSelectedInstance: setSelectedInstance,
+      getRulesEnabled: getRulesEnabled,
+      setRulesEnabled: setRulesEnabled,
+      getActionsEnabled: getActionsEnabled,
+      setActionsEnabled: setActionsEnabled,
       getUpdatesEnabled: getUpdatesEnabled,
       setUpdatesEnabled: setUpdatesEnabled,
+      getShowSpinner: getShowSpinner,
+      setShowSpinner: setShowSpinner,
       getMQTTEndpoint: getMQTTEndpoint,
       getMQTTClientId: getMQTTClientId
     };
@@ -113,6 +120,34 @@
     }
 
     /**
+     * Returns the rulesEnabled flag
+     */
+    function getRulesEnabled() {
+      return rulesEnabled;
+    }
+
+    /**
+     * Sets the rulesEnabled flag
+     */
+    function setRulesEnabled(newRulesEnabled) {
+      rulesEnabled = newRulesEnabled;
+    }
+
+    /**
+     * Returns the actionsEnabled flag
+     */
+    function getActionsEnabled() {
+      return actionsEnabled;
+    }
+
+    /**
+     * Sets the actionsEnabled flag
+     */
+    function setActionsEnabled(newActionsEnabled) {
+      actionsEnabled = newActionsEnabled;
+    }
+
+    /**
      * Returns the udpatesEnabled flag
      */
     function getUpdatesEnabled() {
@@ -124,6 +159,22 @@
      */
     function setUpdatesEnabled(newUpdatesEnabled) {
       updatesEnabled = newUpdatesEnabled;
+    }
+
+    /**
+     * Returns the showSpinner flag
+     */
+    function getShowSpinner() {
+      return showSpinner;
+    }
+
+    /**
+     * Sets the showSpinner flag
+     */
+    function setShowSpinner(show) {
+      if (typeof show === 'boolean') {
+        showSpinner = show;
+      }
     }
 
     /**

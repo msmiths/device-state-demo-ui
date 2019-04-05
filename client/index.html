@@ -57,6 +57,7 @@
       <script src="../bower_components/lodash/lodash.js"></script>
       <script src="../bower_components/angular-ui-router/release/angular-ui-router.js"></script>
       <script src="../bower_components/paho-mqtt/src/mqttws31.js"></script>
+      <script src="../bower_components/mustache.js/mustache.js"></script>
       <!-- endbower -->
     <!-- endbuild -->
 
@@ -67,12 +68,26 @@
     <script src="app/constants/constants.module.js"></script>
     <script src="app/constants/constants.constants.js"></script>
     <script src="app/dialogs/dialogs.module.js"></script>
+    <script src="app/dialogs/ActionDialog/action.dialog.factory.js"></script>
+    <script src="app/dialogs/ActionDialog/action.dialog.controller.js"></script>
+    <script src="app/dialogs/ConfirmationDialog/confirmation.dialog.factory.js"></script>
+    <script src="app/dialogs/ConfirmationDialog/confirmation.dialog.controller.js"></script>
     <script src="app/dialogs/CredentialsDialog/credentials.dialog.factory.js"></script>
     <script src="app/dialogs/CredentialsDialog/credentials.dialog.controller.js"></script>
+    <script src="app/dialogs/ErrorDialog/error.dialog.factory.js"></script>
+    <script src="app/dialogs/ErrorDialog/error.dialog.controller.js"></script>
     <script src="app/dialogs/ErrorNotificationDialog/error.notification.dialog.factory.js"></script>
     <script src="app/dialogs/ErrorNotificationDialog/error.notification.dialog.controller.js"></script>
+    <script src="app/dialogs/HeaderDialog/header.dialog.factory.js"></script>
+    <script src="app/dialogs/HeaderDialog/header.dialog.controller.js"></script>
     <script src="app/dialogs/RuleNotificationDialog/rule.notification.dialog.factory.js"></script>
     <script src="app/dialogs/RuleNotificationDialog/rule.notification.dialog.controller.js"></script>
+    <script src="app/dialogs/RuleDialog/rule.dialog.factory.js"></script>
+    <script src="app/dialogs/RuleDialog/rule.dialog.controller.js"></script>
+    <script src="app/dialogs/TriggerDialog/trigger.dialog.factory.js"></script>
+    <script src="app/dialogs/TriggerDialog/trigger.dialog.controller.js"></script>
+    <script src="app/dialogs/VariableMappingDialog/variable.mapping.dialog.factory.js"></script>
+    <script src="app/dialogs/VariableMappingDialog/variable.mapping.dialog.controller.js"></script>
     <script src="app/directives/directives.module.js"></script>
     <script src="app/directives/d3chart.js"></script>
     <script src="app/layout/layout.module.js"></script>
@@ -81,12 +96,16 @@
     <script src="app/factories/factories.module.js"></script>
     <script src="app/factories/dashboard.factory.js"></script>
     <script src="app/resources/resources.module.js"></script>
+    <script src="app/resources/draft.logicalinterface.resource.js"></script>
     <script src="app/resources/logicalinterface.resource.js"></script>
     <script src="app/resources/draftdevicetype.resource.js"></script>
     <script src="app/resources/devicetype.resource.js"></script>
     <script src="app/resources/thingtype.resource.js"></script>
+    <script src="app/resources/draft.rule.resource.js"></script>
     <script src="app/resources/rule.resource.js"></script>
     <script src="app/resources/schema.resource.js"></script>
+    <script src="app/resources/action.resource.js"></script>
+    <script src="app/resources/trigger.resource.js"></script>
     <script src="app/toasts/toasts.module.js"></script>
     <script src="app/toasts/ActionToast/action.toast.factory.js"></script>
     <script src="app/toasts/ActionToast/action.toast.controller.js"></script>

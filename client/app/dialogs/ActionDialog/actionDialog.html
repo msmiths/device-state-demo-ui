@@ -1,0 +1,163 @@
+<md-dialog class="action-dialog" aria-label="Action dialog">
+    <form name="actionForm" data-ng-cloak>
+      <md-toolbar>
+        <div class="md-toolbar-tools">
+          <h2>{{ vm.createMode ? 'Create New' : 'Edit' }} Action</h2>
+          <span flex></span>
+          <md-button class="md-icon-button" data-ng-click="vm.closeDialog()">
+            <md-icon md-svg-src="app/images/close.svg" aria-label="Close dialog"></md-icon>
+          </md-button>
+        </div>
+      </md-toolbar>
+  
+      <md-dialog-content>
+        <div class="md-dialog-content">
+          <h2 class="md-title">Action Details</h2>
+
+          <!-- 
+            ######################################################################
+            # NAME
+            ######################################################################
+          -->
+          <md-input-container class="md-block">
+            <label>Name</label>
+            <input required minlength="1" maxlength="128" data-md-maxlength="128" name="name" data-ng-model="vm.action.name" ng-pattern="vm.constants.nameRegex">
+            <div data-ng-messages="actionForm.name.$error">
+              <div data-ng-message="required">This is required.</div>
+              <div data-ng-message="data-md-maxlength">The name cannot be empty and cannot be longer than 128 characters.</div>
+              <div data-ng-message="minlength">The name cannot be empty and cannot be longer than 128 characters.</div>
+              <div data-ng-message="pattern">The name specified is not valid.  It must be between 1 and 128 characters in length and consist only of alpha-numerical characters plus hyphen ( - ), underscore ( _ ) or period ( . ).</div>
+            </div>
+          </md-input-container>
+
+          <!-- 
+            ######################################################################
+            # DESCRIPTION
+            ######################################################################
+          -->
+          <md-input-container class="md-block">
+              <label>Description</label>
+              <input maxlength="1024" data-md-maxlength="1024" name="description" data-ng-model="vm.action.description">
+              <div data-ng-messages="actionForm.description.$error">
+                <div data-ng-message="data-md-maxlength">The description cannot be longer than 1024 characters.</div>
+              </div>
+          </md-input-container>
+
+          <!-- 
+            ######################################################################
+            # TARGET URL
+            ######################################################################
+          -->
+          <md-input-container class="md-block">
+            <label>Target URL</label>
+            <input required minlength="5" maxlength="2048" data-md-maxlength="2048" name="targetUrl" data-ng-model="vm.action.configuration.targetUrl">
+            <div data-ng-messages="actionForm.targetUrl.$error">
+              <div data-ng-message="required">This is required.</div>
+              <div data-ng-message="data-md-maxlength">The target URL specified is not valid. It must be between 5 and 2048 characters in length.</div>
+              <div data-ng-message="minlength">The target URL specified is not valid. It must be between 5 and 2048 characters in length.</div>
+            </div>
+          </md-input-container>
+
+          <!-- 
+            ######################################################################
+            # METHOD
+            ######################################################################
+          -->
+          <md-input-container>
+              <label>Method</label>
+              <md-select data-ng-model="vm.action.configuration.method" md-selected-text="vm.action.configuration.method" placeholder="Method">
+                  <md-option value="GET">GET</md-option>
+                  <md-option value="POST" data-ng-selected="vm.action === null ? true : false">POST</md-option>
+                  <md-option value="PUT">PUT</md-option>
+                  <md-option value="DELETE">DELETE</md-option>
+                  <md-option value="PATCH">PATCH</md-option>
+                </md-select>
+            </md-input-container>
+
+            <!-- 
+              ######################################################################
+              # CONTENT TYPE
+              ######################################################################
+            -->
+            <md-input-container class="md-block">
+                <label>Content Type</label>
+                <input maxlength="1024" data-md-maxlength="1024" name="contentType" data-ng-model="vm.action.configuration.contentType">
+                <div data-ng-messages="actionForm.contentType.$error">
+                  <div data-ng-message="data-md-maxlength">The content type cannot be longer than 1024 characters.</div>
+                </div>
+            </md-input-container>
+
+            <!-- 
+              ######################################################################
+              # HEADERS TABLE
+              ######################################################################
+            -->
+            <md-input-container class="md-block">
+              <div class="headers-table-title">
+                <div>
+                  <label>Headers</label>
+                </div>
+                <div>
+                  <button class="btn btn-default btn-sm create-button" data-ng-click="vm.createHeader($event)">
+                    + Create Header
+                  </button>
+                </div>
+              </div>
+              <table class="table table-striped table-bordered table-hover DeviceStateTable" id="headersTable">
+                <thead>
+                  <tr class="info">
+                    <th class="header-name-column">Name</th>
+                    <th class="header-value-column">Value</th>
+                    <th class="action-column">Action</th>
+                  </tr>
+                </thead>
+                <tr data-ng-repeat="header in vm.action.configuration.headers">
+                  <td class="break-long-string-value">{{ header.name }}</td>
+                  <td class="break-long-string-value">{{ header.value }}</td>
+                  <td class="action-button">
+                    <button class="btn btn-default btn-sm" data-ng-click="vm.editHeader($event, header, $index)">
+                      <span class="glyphicon glyphicon-pencil"></span>
+                    </button>
+                    <button class="btn btn-default btn-sm" data-ng-click="vm.deleteHeader($event, header, $index)">
+                      <span class="glyphicon glyphicon-trash"></span>
+                    </button>
+                  </td>
+                </tr>
+              </table>
+            </md-input-container>
+
+            <!-- 
+              ######################################################################
+              # BODY
+              ######################################################################
+            -->
+            <md-input-container class="md-block">
+                <label>Body</label>
+                <textarea class="action-body-textarea" maxlength="8192" data-md-maxlength="8192" name="body" data-ng-model="vm.action.configuration.body"></textarea>
+                <div data-ng-messages="actionForm.body.$error">
+                  <div data-ng-message="data-md-maxlength">The body cannot be longer than 8192 characters.</div>
+                </div>
+            </md-input-container>
+
+            <!-- 
+              ######################################################################
+              # ENABLED
+              ######################################################################
+            -->
+            <md-input-container class="md-block">
+              <label>Enabled</label>
+              <md-switch class="md-primary" data-md-invert data-ng-model="vm.action.enabled" aria-label="Enabled switch"></md-switch>
+            </md-input-container>
+        </div>
+      </md-dialog-content>
+      <md-dialog-actions>
+        <md-button data-ng-click="vm.closeDialog()" class="md-primary">
+          Cancel
+        </md-button>
+        <md-button data-ng-disabled="actionForm.$invalid" data-ng-click="vm.save()">
+          {{ vm.createMode ? 'Create' : 'Save' }}
+        </md-button>
+      </md-dialog-actions>
+    </form>
+</md-dialog>
+  

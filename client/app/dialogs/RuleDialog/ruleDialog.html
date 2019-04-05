@@ -1,0 +1,83 @@
+<md-dialog class="rule-dialog" aria-label="Rule dialog">
+    <form name="ruleForm" data-ng-cloak>
+      <md-toolbar>
+        <div class="md-toolbar-tools">
+          <h2>{{ vm.createMode ? 'Create New' : 'Edit' }} Rule</h2>
+          <span flex></span>
+          <md-button class="md-icon-button" data-ng-disabled="vm.disableButtons" data-ng-click="vm.closeDialog()">
+            <md-icon md-svg-src="app/images/close.svg" aria-label="Close dialog"></md-icon>
+          </md-button>
+        </div>
+      </md-toolbar>
+  
+      <md-dialog-content>
+        <div class="md-dialog-content">
+          <h2 class="md-title">Rule Details</h2>
+          <md-input-container class="md-block">
+            <label>Name</label>
+            <input required minlength="1" maxlength="128" data-md-maxlength="128" name="name" data-ng-model="vm.rule.name" ng-pattern="vm.constants.nameRegex">
+            <div data-ng-messages="ruleForm.name.$error">
+              <div data-ng-message="required">This is required.</div>
+              <div data-ng-message="data-md-maxlength">The name cannot be empty and cannot be longer than 128 characters.</div>
+              <div data-ng-message="minlength">The name cannot be empty and cannot be longer than 128 characters.</div>
+              <div data-ng-message="pattern">The name specified is not valid.  It must be between 1 and 128 characters in length and consist only of alpha-numerical characters plus hyphen ( - ), underscore ( _ ) or period ( . ).</div>
+            </div>
+          </md-input-container>
+          <md-input-container class="md-block">
+              <label>Description</label>
+              <input maxlength="1024" data-md-maxlength="1024" name="description" data-ng-model="vm.rule.description">
+              <div data-ng-messages="ruleForm.description.$error">
+                <div data-ng-message="data-md-maxlength">The description cannot be longer than 1024 characters.</div>
+              </div>
+          </md-input-container>
+          <md-input-container class="md-block">
+            <label>Condition</label>
+            <input required minlength="1" maxlength="1024" data-md-maxlength="1024" name="condition" data-ng-model="vm.rule.condition">
+            <div data-ng-messages="ruleForm.condition.$error">
+              <div data-ng-message="required">This is required.</div>
+              <div data-ng-message="data-md-maxlength">The rule condition specified is not valid. It must be between 1 and 1024 characters in length.</div>
+              <div data-ng-message="minlength">The rule condition specified is not valid. It must be between 1 and 1024 characters in length.</div>
+            </div>
+          </md-input-container>
+          <md-input-container>
+              <label>Notification Strategy</label>
+              <md-select data-ng-model="vm.rule.notificationStrategy.when" md-selected-text="vm.rule.notificationStrategy.when" placeholder="Notification Strategy">
+                  <md-option value="every-time" ng-selected="vm.rule === null ? true : false">Every Time</md-option>
+                  <md-option value="becomes-true">Becomes True</md-option>
+                  <md-option value="persists">Persists</md-option>
+                  <md-option value="x-in-y">X-In-Y</md-option>
+                </md-select>
+            </md-input-container>
+            <br>
+            <md-input-container data-ng-if="vm.rule && (vm.rule.notificationStrategy.when === 'persists' || vm.rule.notificationStrategy.when === 'x-in-y')">
+                <label>Time Period</label>
+                <input required type="number" step="any" name="timePeriod" data-ng-model="vm.rule.notificationStrategy.timePeriod" min="1" max="604800" ng-pattern="/^[\d+]{1,6}$/" />
+                <div data-ng-messages="ruleForm.timePeriod.$error">
+                  <div data-ng-message="min">The time period is not valid. It must be between 1 and 604800.</div>
+                  <div data-ng-message="max">The time period is not valid. It must be between 1 and 604800.</div>
+                  <div data-ng-message="pattern">The time period is not valid. It must be a number between 1 and 604800.</div>
+                </div>
+            </md-input-container>
+            <br>
+            <md-input-container data-ng-if="vm.rule && vm.rule.notificationStrategy.when === 'x-in-y'">
+                <label>Count</label>
+                <input required type="number" step="any" name="count" data-ng-model="vm.rule.notificationStrategy.count" min="1" max="100" ng-pattern="/^[\d+]{1,3}$/" />
+                <div data-ng-messages="ruleForm.count.$error">
+                  <div data-ng-message="min">The count is not valid. It must be between 1 and 100.</div>
+                  <div data-ng-message="max">The count is not valid. It must be between 1 and 100.</div>
+                  <div data-ng-message="pattern">The count is not valid. It must be a number between 1 and 100.</div>
+                </div>
+            </md-input-container>
+        </div>
+      </md-dialog-content>
+      <md-dialog-actions>
+        <md-button data-ng-disabled="vm.disableButtons" data-ng-click="vm.closeDialog()" class="md-primary">
+          Cancel
+        </md-button>
+        <md-button data-ng-disabled="ruleForm.$invalid || vm.disableButtons" data-ng-click="vm.save()">
+          {{ vm.createMode ? 'Create' : 'Save' }}
+        </md-button>
+      </md-dialog-actions>
+    </form>
+</md-dialog>
+  

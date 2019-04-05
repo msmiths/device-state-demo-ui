@@ -167,15 +167,7 @@
           scope.getDomainEndTime = function() {
             var endTime = sessionStartTime;
             if (scope.data && scope.data.length > 1) {
-              // var actualRefreshInterval = scope.refreshInterval;
-              // if (scope.data.length > 1) {
-              //   actualRefreshInterval = scope.data[scope.data.length - 1].timestamp -
-              //                            scope.data[scope.data.length - 2].timestamp;
-              // }
-              // endTime = scope.data[scope.data.length - 1].timestamp - (2 * actualRefreshInterval);
-
-              // endTime = scope.data[scope.data.length - 1].timestamp - (2 * scope.refreshInterval);
-              endTime = scope.data[scope.data.length - 1].timestamp;
+              endTime = scope.data[scope.data.length - 1].timestamp - 2000;
             }
             return endTime;
           }; // getDomainEndTime
@@ -256,6 +248,17 @@
            * most recent data available for the session.
            */
           scope.refresh = function() {
+            // // First, calculate the new domain for the x axis
+            var endTime = scope.getDomainEndTime();
+            var startTime = endTime - sessionWindow;
+            xRange.domain([startTime, endTime]);
+
+            // Now work out how far to slide the elements to the left
+            var leftShift = 0;
+            if (scope.data && scope.data.length > 1) {
+              leftShift = xRange(scope.data[scope.data.length - 1].timestamp - scope.data[scope.data.length - 2].timestamp);
+            }
+
             /*
              * Check to see if we are currently showing any data points on the
              * chart and, if we are, add in any new data points that are
@@ -276,7 +279,6 @@
               var property = scope.properties[index];
 
               // Select the line for the current property and update it
-              // var line = chart.select('#' + property.name + '_line');
               var line = t.select('#' + property.name + '_line');
               line.attr('d', lineGenerators[property.name](scope.data))
                   .attr('transform', null);
@@ -286,10 +288,8 @@
                * points on the current line and, if there are, update each
                * of them.
                */
-              // chart.selectAll('circle[id^=\'' + property.name + '_circle\']')
               t.selectAll('circle[id^=\'' + property.name + '_circle\']')
                 .attr('cx', function(d) {
-                  // return xRange(d.timestamp);
                   return xRange(d.timestamp);
                 })
                 .attr('cy', function(d) {
@@ -306,34 +306,16 @@
              * 
              *   https://bost.ocks.org/mike/path/
              */
-
-            // First, calculate the new domain for the x axis
-            var endTime = scope.getDomainEndTime();
-            var startTime = endTime - sessionWindow;
-            xRange.domain([startTime, endTime]);
-
-            // Now work out how far to slide the elements to the left
-            var leftShift = 0;
-            if (scope.data && scope.data.length > 1) {
-              leftShift = xRange(scope.data[scope.data.length - 1].timestamp) -
-                          xRange(scope.data[scope.data.length - 2].timestamp);
-              // leftShift = xRange(endTime) - xRange(endTime - scope.refreshInterval);
-            }
-
-            // // Create the transition
-            // var t = chart.transition()
-            //   .duration(750)
-            //   .ease(d3.easeLinear);
-
-            // Now transform the lines, circles and x axis
-            // t.selectAll('.line')
-            //   .attr('transform', 'translate(-' + leftShift + ')');
-            // t.selectAll('circle')
-            //   .attr('transform', 'translate(-' + leftShift + ')');
             t.select('.x.DeviceStateChartAxis')
               .call(xAxis)
               .selectAll('text')
               .attr('y', '10');
+
+              if (scope.data && scope.data.length > 65) {
+                scope.data.shift();
+              }
+              console.log('DATA LENGTH: ' + scope.data.length);
+  
           }; // refresh
 
           // Watch for changes to the properties

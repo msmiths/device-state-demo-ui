@@ -1,0 +1,182 @@
+<md-dialog class="trigger-dialog" aria-label="Trigger dialog">
+    <form name="triggerForm" data-ng-cloak>
+      <md-toolbar>
+        <div class="md-toolbar-tools">
+          <h2>{{ vm.createMode ? 'Create New' : 'Edit' }} Trigger</h2>
+          <span flex></span>
+          <md-button class="md-icon-button" data-ng-click="vm.closeDialog()">
+            <md-icon md-svg-src="app/images/close.svg" aria-label="Close dialog"></md-icon>
+          </md-button>
+        </div>
+      </md-toolbar>
+  
+      <md-dialog-content>
+        <div class="md-dialog-content">
+          <h2 class="md-title">Trigger Details</h2>
+
+          <!-- 
+            ######################################################################
+            # NAME
+            ######################################################################
+          -->
+          <md-input-container class="md-block">
+            <label>Name</label>
+            <input required minlength="1" maxlength="128" data-md-maxlength="128" name="name" data-ng-model="vm.trigger.name" ng-pattern="vm.constants.nameRegex">
+            <div data-ng-messages="triggerForm.name.$error">
+              <div data-ng-message="required">This is required.</div>
+              <div data-ng-message="data-md-maxlength">The name cannot be empty and cannot be longer than 128 characters.</div>
+              <div data-ng-message="minlength">The name cannot be empty and cannot be longer than 128 characters.</div>
+              <div data-ng-message="pattern">The name specified is not valid.  It must be between 1 and 128 characters in length and consist only of alpha-numerical characters plus hyphen ( - ), underscore ( _ ) or period ( . ).</div>
+            </div>
+          </md-input-container>
+
+          <!-- 
+            ######################################################################
+            # DESCRIPTION
+            ######################################################################
+          -->
+          <md-input-container class="md-block">
+              <label>Description</label>
+              <input maxlength="1024" data-md-maxlength="1024" name="description" data-ng-model="vm.trigger.description">
+              <div data-ng-messages="triggerForm.description.$error">
+                <div data-ng-message="data-md-maxlength">The description cannot be longer than 1024 characters.</div>
+              </div>
+          </md-input-container>
+
+          <!-- 
+            ######################################################################
+            # LOGICAL INTERFACE
+            ######################################################################
+          -->
+          <md-input-container class="md-block">
+            <label>Logical Interface</label>
+            <input required name="logicalInterface" data-ng-model="vm.logicalInterface.name" readonly>
+          </md-input-container>
+
+          <!-- 
+            ######################################################################
+            # RULE ID
+            ######################################################################
+          -->
+          <md-input-container class="md-block">
+              <label>Rule</label>
+              <md-select data-ng-model="vm.trigger.configuration.ruleId" placeholder="Rule">
+                <md-option value="*">*</md-option>
+                <md-option data-ng-repeat="rule in vm.rules" value="{{ rule.id }}" data-ng-selected="vm.trigger.configuration.ruleId == rule.id">{{ rule.name }}</md-option>
+              </md-select>
+  
+            <!-- <label>Rule Id</label>
+            <input required minlength="24" maxlength="24" data-md-maxlength="24" name="ruleId" data-ng-model="vm.trigger.configuration.ruleId">
+            <div data-ng-messages="triggerForm.ruleId.$error">
+              <div data-ng-message="required">This is required.</div>
+              <div data-ng-message="data-md-maxlength">The ruleId specified is not valid. It must either be the wildcard character (*) or a 24 byte hex string.</div>
+              <div data-ng-message="minlength">The ruleId specified is not valid. It must either be the wildcard character (*) or a 24 byte hex string.</div>
+            </div> -->
+          </md-input-container>
+
+          <!-- 
+            ######################################################################
+            # TYPE
+            ######################################################################
+          -->
+          <md-input-container>
+            <label>Type</label>
+            <md-select data-ng-model="vm.trigger.configuration.type" md-selected-text="vm.trigger.configuration.type" data-ng-model-options="{trackBy: '$value'}" placeholder="Type">
+              <md-option value="*">*</md-option>
+              <md-option value="device">device</md-option>
+              <md-option value="thing">thing</md-option>
+            </md-select>
+          </md-input-container>
+
+          <!-- 
+            ######################################################################
+            # TYPE ID
+            ######################################################################
+          -->
+          <md-input-container class="md-block">
+              <label>Type Id</label>
+              <input required minlength="1" maxlength="32" data-md-maxlength="32" name="typeId" data-ng-model="vm.trigger.configuration.typeId">
+              <div data-ng-messages="triggerForm.typeId.$error">
+                <div data-ng-message="required">This is required.</div>
+                <div data-ng-message="data-md-maxlength">The type id cannot be empty and cannot be longer than 32 characters.</div>
+                <div data-ng-message="minlength">The type id cannot be empty and cannot be longer than 32 characters.</div>
+              </div>
+          </md-input-container>
+
+          <!-- 
+            ######################################################################
+            # INSTANCE ID
+            ######################################################################
+          -->
+          <md-input-container class="md-block">
+              <label>Instance Id</label>
+              <input required minlength="1" maxlength="32" data-md-maxlength="32" name="instanceId" data-ng-model="vm.trigger.configuration.instanceId">
+              <div data-ng-messages="triggerForm.instanceId.$error">
+                  <div data-ng-message="required">This is required.</div>
+                  <div data-ng-message="data-md-maxlength">The instance id cannot be empty and cannot be longer than 32 characters.</div>
+                  <div data-ng-message="minlength">The instance id cannot be empty and cannot be longer than 32 characters.</div>
+                </div>
+          </md-input-container>
+
+          <!-- 
+            ######################################################################
+            # VARIABLE MAPPINGS TABLE
+            ######################################################################
+          -->
+          <md-input-container class="md-block">
+            <div class="variable-mappings-table-title">
+              <div>
+                <label>Variable Mappings</label>
+              </div>
+              <div>
+                <button class="btn btn-default btn-sm create-button" data-ng-click="vm.createVariableMapping($event)">
+                  + Create Variable Mapping
+                </button>
+              </div>
+            </div>
+            <table class="table table-striped table-bordered table-hover DeviceStateTable" id="variableMappingsTable">
+              <thead>
+                <tr class="info">
+                  <th class="variable-name-column">Name</th>
+                  <th class="variable-expression-column">Expression</th>
+                  <th class="action-column">Action</th>
+                </tr>
+              </thead>
+              <tr data-ng-repeat="(name, expression) in vm.trigger.variableMappings">
+                <td class="break-long-string-value">{{ name }}</td>
+                <td class="break-long-string-value">{{ expression }}</td>
+                <td class="action-button">
+                  <button class="btn btn-default btn-sm" data-ng-click="vm.editVariableMapping($event, name, expression)">
+                    <span class="glyphicon glyphicon-pencil"></span>
+                  </button>
+                  <button class="btn btn-default btn-sm" data-ng-click="vm.deleteVariableMapping($event, name, expression)">
+                    <span class="glyphicon glyphicon-trash"></span>
+                  </button>
+                </td>
+              </tr>
+            </table>
+          </md-input-container>
+
+          <!-- 
+            ######################################################################
+            # ENABLED
+            ######################################################################
+          -->
+          <md-input-container class="md-block">
+            <label>Enabled</label>
+            <md-switch class="md-primary" data-md-invert data-ng-model="vm.trigger.enabled" aria-label="Enabled switch"></md-switch>
+          </md-input-container>
+  
+        </div>
+      </md-dialog-content>
+      <md-dialog-actions>
+        <md-button data-ng-click="vm.closeDialog()" class="md-primary">
+          Cancel
+        </md-button>
+        <md-button data-ng-disabled="triggerForm.$invalid" data-ng-click="vm.save()">
+          {{ vm.createMode ? 'Create' : 'Save' }}
+        </md-button>
+      </md-dialog-actions>
+    </form>
+</md-dialog>
+  

@@ -1,0 +1,45 @@
+<md-dialog class="variable-mapping-dialog" aria-label="Variable mapping dialog">
+  <form name="variableMappingForm" data-ng-cloak>
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>{{ vm.createMode ? 'Create New' : 'Edit' }} Variable Mapping</h2>
+        <span flex></span>
+        <md-button class="md-icon-button" data-ng-click="vm.closeDialog()">
+          <md-icon md-svg-src="app/images/close.svg" aria-label="Close dialog"></md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <h2 class="md-title">Variable Mapping Details</h2>
+        <md-input-container class="md-block">
+          <label>Name</label>
+          <input required minlength="1" maxlength="32" data-md-maxlength="32" name="name" data-ng-model="vm.name">
+          <div data-ng-messages="variableMappingForm.name.$error">
+            <div data-ng-message="required">This is required.</div>
+            <div data-ng-message="data-md-maxlength">The name cannot be empty and cannot be longer than 32 characters.</div>
+            <div data-ng-message="minlength">The name cannot be empty and cannot be longer than 32 characters.</div>
+          </div>
+        </md-input-container>
+        <md-input-container class="md-block">
+          <label>Expression</label>
+          <input required minlength="1" maxlength="1024" data-md-maxlength="1024" name="value" data-ng-model="vm.value">
+          <div data-ng-messages="variableMappingForm.value.$error">
+            <div data-ng-message="required">This is required.</div>
+            <div data-ng-message="data-md-maxlength">The value cannot be empty and cannot be longer than 1024 characters.</div>
+            <div data-ng-message="minlength">The value cannot be empty and cannot be longer than 1024 characters.</div>
+          </div>
+        </md-input-container>
+      </div>
+    </md-dialog-content>
+    <md-dialog-actions>
+      <md-button data-ng-click="vm.closeDialog()" class="md-primary">
+        Cancel
+      </md-button>
+      <md-button data-ng-disabled="variableMappingForm.$invalid" data-ng-click="vm.save()">
+        Save
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

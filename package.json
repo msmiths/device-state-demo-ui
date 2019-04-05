@@ -4,7 +4,7 @@
   "main": "server/app.js",
   "private": true,
   "dependencies": {
-    "express": "~4.14.1",
+    "express": "~4.16.4",
     "cfenv": "1.0.x",
     "body-parser": "~1.16.1",
     "composable-middleware": "^0.3.0",
@@ -51,7 +51,7 @@
     "grunt-mocha-test": "~0.13.2",
     "jit-grunt": "^0.10.0",
     "time-grunt": "~1.4.0",
-    "grunt-express-server": "~0.5.3",
+    "grunt-express-server": "~0.5.4",
     "grunt-open": "~0.2.3",
     "open": "~0.0.4",
     "jshint-stylish": "~2.2.1",
@@ -73,8 +73,7 @@
     "supertest": "~3.0.0",
     "should": "~11.2.0"
   },
-  "repository":{
-  },
+  "repository": {},
   "engines": {
     "node": "4.2.2"
   },

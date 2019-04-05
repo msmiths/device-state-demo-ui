@@ -19,6 +19,18 @@
           </md-button>
         </md-menu-item>
         <md-menu-item>
+          <md-button data-ng-click="vm.toggleRules($event)">
+            <md-icon md-svg-icon="toggle:check_box{{vm.DashboardFactory.getRulesEnabled() ? '' : '_outline_blank'}}"></md-icon>
+            {{vm.DashboardFactory.getRulesEnabled() ? 'Disable' : 'Enable' }} Rules
+          </md-button>
+        </md-menu-item>
+        <md-menu-item>
+          <md-button data-ng-click="vm.toggleActions($event)">
+            <md-icon md-svg-icon="toggle:check_box{{vm.DashboardFactory.getActionsEnabled() ? '' : '_outline_blank'}}"></md-icon>
+            {{vm.DashboardFactory.getActionsEnabled() ? 'Disable' : 'Enable' }} Actions
+          </md-button>
+        </md-menu-item>
+        <md-menu-item>
           <md-button data-ng-click="vm.toggleUpdates($event)">
             <md-icon md-svg-icon="social:notifications{{vm.DashboardFactory.getUpdatesEnabled() ? '' : '_off'}}"></md-icon>
             {{vm.DashboardFactory.getUpdatesEnabled() ? 'Disable' : 'Enable' }} updates
