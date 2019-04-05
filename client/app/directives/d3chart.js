@@ -310,12 +310,6 @@
               .call(xAxis)
               .selectAll('text')
               .attr('y', '10');
-
-              if (scope.data && scope.data.length > 65) {
-                scope.data.shift();
-              }
-              console.log('DATA LENGTH: ' + scope.data.length);
-  
           }; // refresh
 
           // Watch for changes to the properties
