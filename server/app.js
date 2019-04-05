@@ -37,7 +37,7 @@ console.log('process.env.WIOT_DOMAIN: %s ', process.env.WIOT_DOMAIN);
 var app = express();
 app.use('/api/v0002', proxy(process.env.WIOT_ORG_ID + '.' + process.env.WIOT_DOMAIN, {
   https: true,
-  forwardPath: function(req, res) {
+  proxyReqPathResolver: function (req) {
     // Remove the origin header to avoid CORS issues
     delete req.headers['origin'];
     return '/api/v0002' + url.parse(req.url).path;
